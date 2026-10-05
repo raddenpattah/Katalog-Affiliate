@@ -7,7 +7,10 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    heroImage: z.string().url(),
+    heroImage: z.union([
+      z.string().url(),
+      z.string().regex(/^\/images\/blog\/.+/),
+    ]),
     category: z.string(),
     author: z.string().default('Alfeto'),
     productIds: z.array(z.string()).default([]),

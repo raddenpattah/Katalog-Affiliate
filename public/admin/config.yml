@@ -1,0 +1,56 @@
+backend:
+  name: github
+  repo: raddenpattah/Katalog-Affiliate
+  branch: main
+  base_url: https://alfeto-decap-auth.alfeto.workers.dev
+  auth_endpoint: /auth
+
+media_folder: public/images/blog
+public_folder: /images/blog
+
+collections:
+  - name: blog
+    label: Blog
+    folder: src/content/blog
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    fields:
+      - label: Judul
+        name: title
+        widget: string
+      - label: Deskripsi
+        name: description
+        widget: text
+      - label: Tanggal Terbit
+        name: pubDate
+        widget: datetime
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        format: "YYYY-MM-DD"
+      - label: Gambar Utama
+        name: heroImage
+        widget: image
+      - label: Kategori
+        name: category
+        widget: string
+      - label: Penulis
+        name: author
+        widget: string
+        default: Alfeto
+      - label: ID Produk
+        name: productIds
+        widget: list
+        required: false
+        field:
+          label: ID Produk
+          name: productId
+          widget: string
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: false
+      - label: Isi Artikel
+        name: body
+        widget: markdown
