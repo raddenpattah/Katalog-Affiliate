@@ -11,8 +11,6 @@ export interface Product {
   badge?: string;
 }
 
-import productData from './catalog-products.json';
-
 export const categoryLabels: Record<ProductCategory, string> = {
   dinding: 'Dinding & Panel',
   tanaman: 'Tanaman & Pot',
@@ -20,11 +18,16 @@ export const categoryLabels: Record<ProductCategory, string> = {
   aksesoris: 'Aksesoris Ruang',
 };
 
+const productFiles = import.meta.glob<Product>('./products/*.json', {
+  eager: true,
+  import: 'default',
+});
+
 function isProductCategory(value: string): value is ProductCategory {
   return productCategories.some((category) => category === value);
 }
 
-export const products: Product[] = productData.products.map((product, index) => {
+export const products: Product[] = Object.values(productFiles).map((product, index) => {
   if (!isProductCategory(product.category)) {
     throw new Error(`Product ${index + 1} has an unsupported category "${product.category}".`);
   }

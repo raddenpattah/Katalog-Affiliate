@@ -11,46 +11,44 @@ public_folder: /images/blog
 collections:
   - name: products
     label: Produk
-    files:
-      - name: product_catalog
-        label: Katalog Produk
-        file: src/data/catalog-products.json
-        fields:
-          - label: Daftar Produk
-            name: products
-            widget: list
-            fields:
-              - label: ID Produk
-                name: id
-                widget: string
-              - label: Nama Produk
-                name: title
-                widget: string
-              - label: Kategori
-                name: category
-                widget: select
-                options:
-                  - label: Dinding & Panel
-                    value: dinding
-                  - label: Tanaman & Pot
-                    value: tanaman
-                  - label: Lampu & Cermin
-                    value: lampu
-                  - label: Aksesoris Ruang
-                    value: aksesoris
-              - label: Gambar Produk
-                name: imageUrl
-                widget: image
-                media_folder: /public/images/products
-                public_folder: /images/products
-                choose_url: true
-              - label: Link Shopee
-                name: shopeeUrl
-                widget: string
-              - label: Label Promo
-                name: badge
-                widget: string
-                required: false
+    folder: src/data/products
+    create: true
+    extension: json
+    format: json
+    identifier_field: title
+    slug: "{{slug}}"
+    fields:
+      - label: ID Produk
+        name: id
+        widget: string
+      - label: Nama Produk
+        name: title
+        widget: string
+      - label: Kategori
+        name: category
+        widget: select
+        options:
+          - label: Dinding & Panel
+            value: dinding
+          - label: Tanaman & Pot
+            value: tanaman
+          - label: Lampu & Cermin
+            value: lampu
+          - label: Aksesoris Ruang
+            value: aksesoris
+      - label: Gambar Produk
+        name: imageUrl
+        widget: image
+        media_folder: /public/images/products
+        public_folder: /images/products
+        choose_url: true
+      - label: Link Shopee
+        name: shopeeUrl
+        widget: string
+      - label: Label Promo
+        name: badge
+        widget: string
+        required: false
   - name: blog
     label: Blog
     folder: src/content/blog
@@ -83,12 +81,16 @@ collections:
         default: Alfeto
       - label: ID Produk
         name: productIds
-        widget: list
+        widget: relation
+        collection: products
+        search_fields:
+          - title
+          - id
+        value_field: id
+        display_fields:
+          - title
+        multiple: true
         required: false
-        field:
-          label: ID Produk
-          name: productId
-          widget: string
       - label: Draft
         name: draft
         widget: boolean
