@@ -41,6 +41,10 @@ The CMS uses the GitHub backend for this repository. Before signing in on a
 deployed site, configure a GitHub OAuth app and an OAuth provider for Decap CMS;
 authentication credentials are intentionally not stored in this repository.
 
+The CMS also includes a **Produk** collection for editing product details and
+Shopee links in `src/data/catalog-products.json`. Blog articles refer to these
+products by their ID in the `productIds` field.
+
 ### GitHub OAuth for a Vercel deployment
 
 Vercel does not provide a built-in OAuth proxy for Decap's GitHub backend. Keep
