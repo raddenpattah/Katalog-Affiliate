@@ -38,9 +38,12 @@ collections:
                     value: lampu
                   - label: Aksesoris Ruang
                     value: aksesoris
-              - label: URL Gambar
+              - label: Gambar Produk
                 name: imageUrl
-                widget: string
+                widget: image
+                media_folder: /public/images/products
+                public_folder: /images/products
+                choose_url: true
               - label: Link Shopee
                 name: shopeeUrl
                 widget: string

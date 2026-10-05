@@ -42,8 +42,9 @@ deployed site, configure a GitHub OAuth app and an OAuth provider for Decap CMS;
 authentication credentials are intentionally not stored in this repository.
 
 The CMS also includes a **Produk** collection for editing product details and
-Shopee links in `src/data/catalog-products.json`. Blog articles refer to these
-products by their ID in the `productIds` field.
+Shopee links in `src/data/catalog-products.json`. Product images can be uploaded
+from the CMS to `public/images/products/`; blog articles refer to these products
+by their ID in the `productIds` field.
 
 ### GitHub OAuth for a Vercel deployment
 
