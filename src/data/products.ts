@@ -9,6 +9,7 @@ export interface Product {
   imageUrl: string;
   shopeeUrl: string;
   badge?: string;
+  description?: string;
 }
 
 const productFiles = import.meta.glob<Product>('./products/*.json', {

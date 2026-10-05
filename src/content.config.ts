@@ -19,4 +19,17 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { blog };
+const produk = defineCollection({
+  loader: glob({ base: './src/data/products', pattern: '**/*.json' }),
+  schema: z.object({
+    id: z.string(),
+    title: z.string(),
+    category: z.enum(productCategories),
+    imageUrl: z.union([z.string().url(), z.string().regex(/^\/images\/products\/.+/)]),
+    shopeeUrl: z.string().url(),
+    badge: z.string().optional(),
+    description: z.string().optional(),
+  }),
+});
+
+export const collections = { blog, produk };

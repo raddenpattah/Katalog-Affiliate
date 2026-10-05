@@ -24,6 +24,10 @@ collections:
       - label: Nama Produk
         name: title
         widget: string
+      - label: Deskripsi Produk
+        name: description
+        widget: text
+        required: false
       - label: Kategori
         name: category
         widget: select
