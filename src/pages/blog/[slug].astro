@@ -1,5 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
+import ProductCard from '../../components/ProductCard.astro';
+import { products } from '../../data/products';
 import '../../styles/global.css';
 
 export async function getStaticPaths() {
@@ -13,6 +15,15 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const recommendedProducts = post.data.productIds.map((productId) => {
+  const product = products.find(({ id }) => id === productId);
+
+  if (!product) {
+    throw new Error(`Blog post "${post.id}" references unknown product "${productId}".`);
+  }
+
+  return product;
+});
 const dateFormatter = new Intl.DateTimeFormat('id-ID', {
   day: 'numeric',
   month: 'long',
@@ -27,6 +38,7 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
     <meta name="p:domain_verify" content="63cbf7dea4ba5f9335e79eecc975eb9a" />
     <meta name="description" content={post.data.description} />
     <title>{post.data.title} | Alfeto — Kurasi &amp; Inspirasi Dekorasi Ruang Aesthetic</title>
+    <meta property="og:image" content={post.data.heroImage} />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Alfeto" />
     <meta property="og:title" content={`${post.data.title} | Alfeto`} />
@@ -45,6 +57,7 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
     <main class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
       <article>
         <header class="border-b border-stone-200 pb-7">
+          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">{post.data.category}</p>
           <p class="text-xs text-stone-500">
             {dateFormatter.format(post.data.pubDate)} · {post.data.author}
           </p>
@@ -52,10 +65,28 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
             {post.data.title}
           </h1>
           <p class="mt-4 text-base leading-7 text-stone-600">{post.data.description}</p>
+          <img
+            src={post.data.heroImage}
+            alt={`Inspirasi ${post.data.category.toLowerCase()} — ${post.data.title}`}
+            class="mt-7 aspect-[4/3] w-full rounded-2xl object-cover sm:aspect-[16/9]"
+            width="1200"
+            height="900"
+          />
         </header>
         <div class="prose prose-stone mt-8 max-w-none prose-a:text-emerald-700 prose-headings:text-stone-900">
           <Content />
         </div>
+        {recommendedProducts.length > 0 && (
+          <section class="mt-12 border-t border-stone-200 pt-8">
+            <h2 class="text-2xl font-semibold tracking-tight text-stone-900">Rekomendasi produk</h2>
+            <p class="mt-2 text-sm leading-6 text-stone-600">
+              Pilihan dekorasi yang dibahas dalam artikel ini.
+            </p>
+            <div class="mt-5 grid grid-cols-2 gap-3 sm:gap-5">
+              {recommendedProducts.map((product) => <ProductCard product={product} />)}
+            </div>
+          </section>
+        )}
       </article>
     </main>
   </body>

@@ -27,7 +27,7 @@ export const products: Product[] = [
     price: 'Rp22.000',
     imageUrl:
       'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80',
-    shopeeUrl: 'https://shopee.co.id/search?keyword=WPC%20Wood%20Wall%20Panel',
+    shopeeUrl: 'https://s.shopee.co.id/BULBzDdYN',
     badge: 'Terjual 10k+',
   },
   {
@@ -78,8 +78,7 @@ export const products: Product[] = [
     price: 'Rp55.000',
     imageUrl:
       'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=80',
-    shopeeUrl:
-      'https://shopee.co.id/search?keyword=Cermin%20Dinding%20Gantung%20Aesthetic',
+    shopeeUrl: 'https://s.shopee.co.id/50ZawwX0oO',
     badge: 'Terlaris',
   },
 ];

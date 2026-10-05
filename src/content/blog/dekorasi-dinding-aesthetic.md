@@ -1,15 +1,42 @@
 ---
-title: 'Placeholder: Ide Dekorasi Dinding Aesthetic'
-description: 'Contoh artikel untuk menyiapkan koleksi blog dan routing artikel Alfeto.'
+title: '5 Ide Dekorasi Dinding Kamar Aesthetic yang Hemat Budget'
+description: 'Ubah dinding kamar polos jadi lebih estetik dan cozy dengan WPC wall panel, cermin gantung, dan rak kayu minimalis.'
 pubDate: 2026-10-05
-author: Alfeto
+heroImage: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1200'
+category: 'Dinding & Panel'
+author: 'Alfeto Decor'
+productIds:
+  - wpc-wood-wall-panel
+  - cermin-dinding-gantung-aesthetic
 draft: false
 ---
 
-Ini adalah artikel contoh untuk menyiapkan blog Alfeto. Ganti isi placeholder ini dengan panduan dekorasi, rekomendasi produk, atau inspirasi ruang yang ingin dibagikan.
+Dinding kamar yang polos sering kali bikin suasana ruangan terasa dingin dan membosankan. Padahal, dengan sedikit sentuhan dekorasi yang tepat, tampilan kamar bisa berubah jadi lebih estetik dan cozy.
 
-## Mulai dari suasana ruang
+Berikut lima ide dekorasi dinding minimalis yang bisa kamu eksekusi sendiri di rumah tanpa perlu menyewa tukang.
 
-Pilih satu nuansa yang ingin dibangun, lalu padukan warna dinding, tekstur, tanaman, dan pencahayaan agar terasa serasi.
+## 1. Gunakan WPC Wood Wall Panel
 
-> Catatan: Alfeto dapat menerima komisi dari pembelian melalui tautan rekomendasi produk.
+WPC (Wood Plastic Composite) memberi aksen kayu yang hangat dan bisa menjadi cara praktis untuk memperbarui tampilan dinding.
+
+**Tips:** Pasang di satu sisi dinding saja sebagai *feature wall*, misalnya di belakang *headboard* kasur atau meja kerja.
+
+## 2. Tambahkan cermin gantung asimetris
+
+Selain untuk bercermin, cermin dapat memantulkan cahaya dan membantu ruangan terasa lebih lapang. Pilih bentuk asimetris atau bulat dengan bingkai tipis agar tampil ringan.
+
+## 3. Pasang rak dinding kayu hexagonal
+
+Pajangan kecil, sukulen, atau parfum bisa ditata di rak dinding gantung. Bentuk hexagonal memberi aksen geometris sekaligus membantu menjaga permukaan meja tetap rapi.
+
+## 4. Buat galeri foto sederhana
+
+Susun beberapa foto atau ilustrasi dengan palet warna yang senada. Atur jarak antarbingkai secara konsisten agar dinding terasa rapi, bukan penuh.
+
+## 5. Lengkapi dengan pencahayaan hangat
+
+Lampu dinding atau lampu meja bernuansa warm white dapat menonjolkan tekstur panel dan membuat suasana kamar lebih nyaman pada malam hari.
+
+## Rekomendasi produk dinding
+
+Lihat pilihan produk yang digunakan sebagai inspirasi artikel ini di bawah.
