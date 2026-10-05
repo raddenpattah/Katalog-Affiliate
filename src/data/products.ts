@@ -25,8 +25,7 @@ export const products: Product[] = [
     title: 'WPC Wood Wall Panel',
     category: 'dinding',
     price: 'Rp22.000',
-    imageUrl:
-      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80',
+    imageUrl: '/images/products/wpc-wood-wall-panel.jpg',
     shopeeUrl: 'https://s.shopee.co.id/BULBzDdYN',
     badge: 'Terjual 10k+',
   },
@@ -76,8 +75,7 @@ export const products: Product[] = [
     title: 'Cermin Dinding Gantung Aesthetic',
     category: 'aksesoris',
     price: 'Rp55.000',
-    imageUrl:
-      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=80',
+    imageUrl: '/images/products/cermin-dinding-gantung-aesthetic.jpg',
     shopeeUrl: 'https://s.shopee.co.id/50ZawwX0oO',
     badge: 'Terlaris',
   },
