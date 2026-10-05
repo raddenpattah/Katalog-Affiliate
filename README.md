@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alfeto
 
-## Getting Started
+Alfeto adalah katalog produk dekorasi dan blog inspirasi ruang aesthetic.
 
-First, run the development server:
+## Getting started
 
-```bash
+Install dependencies and start the Astro development server:
+
+```sh
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Astro serves the site at `http://localhost:4321`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+npm run build
+npm run preview
+```
 
-## Learn More
+## Pages
 
-To learn more about Next.js, take a look at the following resources:
+- `/` — product catalog with category filters
+- `/blog` — blog index backed by Astro Content Collections
+- `/blog/<slug>` — individual Markdown or MDX articles
+- `/about` — tentang Alfeto
+- `/contact` — formulir kontak yang membuka aplikasi surel pengunjung
+- `/privacy-policy` — kebijakan privasi dan informasi tautan rekomendasi
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Product details and Shopee URLs are in `src/data/products.ts`. Replace the sample search URLs with your product links before publishing. Product categories are `dinding`, `tanaman`, `lampu`, and `aksesoris`. Add blog entries as `.md` or `.mdx` files under `src/content/blog/`, with `title`, `description`, and `pubDate` frontmatter. Draft posts can be hidden from the public blog by setting `draft: true`.
