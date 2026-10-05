@@ -41,6 +41,7 @@ const ProductCatalogPreview = createClass({
             h('img', {
               src: image,
               alt: data.get('title') || '',
+              className: 'product-preview-image',
               style: {
                 background: '#f5f5f4',
                 border: '1px solid #e7e5e4',
@@ -139,6 +140,7 @@ const BlogPostPreview = createClass({
               h('img', {
                 src: image,
                 alt: data.get('title') || '',
+                className: 'blog-preview-image',
                 style: {
                   background: '#f5f5f4',
                   border: '1px solid #e7e5e4',
@@ -220,3 +222,5 @@ const BlogPostPreview = createClass({
 });
 
 CMS.registerPreviewTemplate('blog', BlogPostPreview);
+
+CMS.registerPreviewStyle('/admin/preview.css');
