@@ -33,7 +33,7 @@ const { product } = Astro.props;
 
   <div class="flex flex-1 flex-col p-3 sm:p-4">
     <p class="text-[10px] font-medium uppercase tracking-[0.12em] text-stone-500 sm:text-xs">{categoryLabels[product.category]}</p>
-    <h2 class="mt-1.5 min-h-10 text-xs font-medium leading-5 text-stone-900 sm:mt-2 sm:min-h-12 sm:text-sm sm:leading-6">
+    <h2 class="mt-1.5 min-h-10 font-sans text-sm font-medium leading-5 text-stone-900 sm:mt-2 sm:min-h-12 sm:text-base sm:leading-6">
       <a href={`/produk/${product.id}`} class="line-clamp-2 hover:underline focus-visible:outline-none focus-visible:underline">
       {product.title}
       </a>

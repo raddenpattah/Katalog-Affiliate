@@ -6,8 +6,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        serif: ['"Playfair Display"', 'ui-serif', 'Georgia', 'serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
       },
       boxShadow: {
         soft: '0 24px 50px -28px rgba(18, 18, 18, 0.35)',
