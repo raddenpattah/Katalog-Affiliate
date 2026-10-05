@@ -74,7 +74,16 @@ collections:
         widget: image
       - label: Kategori
         name: category
-        widget: string
+        widget: select
+        options:
+          - label: Dinding & Panel
+            value: dinding
+          - label: Tanaman & Pot
+            value: tanaman
+          - label: Lampu & Cermin
+            value: lampu
+          - label: Aksesoris Ruang
+            value: aksesoris
       - label: Penulis
         name: author
         widget: string
@@ -86,9 +95,10 @@ collections:
         search_fields:
           - title
           - id
+          - category
         value_field: id
         display_fields:
-          - title
+          - "{{title}} ({{category}})"
         multiple: true
         required: false
       - label: Draft

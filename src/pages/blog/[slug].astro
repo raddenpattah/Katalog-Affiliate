@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import ProductCard from '../../components/ProductCard.astro';
+import { categoryLabels } from '../../data/categories';
 import { products } from '../../data/products';
 import '../../styles/global.css';
 
@@ -57,7 +58,9 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
     <main class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
       <article>
         <header class="border-b border-stone-200 pb-7">
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">{post.data.category}</p>
+          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
+            {categoryLabels[post.data.category]}
+          </p>
           <p class="text-xs text-stone-500">
             {dateFormatter.format(post.data.pubDate)} · {post.data.author}
           </p>

@@ -1,6 +1,6 @@
-export const productCategories = ['dinding', 'tanaman', 'lampu', 'aksesoris'] as const;
+import { categoryLabels, productCategories, type ProductCategory } from './categories';
 
-export type ProductCategory = (typeof productCategories)[number];
+export { categoryLabels, productCategories, type ProductCategory } from './categories';
 
 export interface Product {
   id: string;
@@ -10,13 +10,6 @@ export interface Product {
   shopeeUrl: string;
   badge?: string;
 }
-
-export const categoryLabels: Record<ProductCategory, string> = {
-  dinding: 'Dinding & Panel',
-  tanaman: 'Tanaman & Pot',
-  lampu: 'Lampu & Cermin',
-  aksesoris: 'Aksesoris Ruang',
-};
 
 const productFiles = import.meta.glob<Product>('./products/*.json', {
   eager: true,

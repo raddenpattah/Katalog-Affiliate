@@ -93,6 +93,13 @@ const ProductCatalogPreview = createClass({
 
 CMS.registerPreviewTemplate('products', ProductCatalogPreview);
 
+const categoryLabels = {
+  dinding: 'Dinding & Panel',
+  tanaman: 'Tanaman & Pot',
+  lampu: 'Lampu & Cermin',
+  aksesoris: 'Aksesoris Ruang',
+};
+
 const BlogPostPreview = createClass({
   render() {
     const data = this.props.entry.get('data');
@@ -161,7 +168,7 @@ const BlogPostPreview = createClass({
                       padding: '3px 9px',
                     },
                   },
-                  data.get('category') || 'Tanpa kategori',
+                  categoryLabels[data.get('category')] || 'Tanpa kategori',
                 ),
                 h(
                   'span',

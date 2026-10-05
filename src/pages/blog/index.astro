@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { categoryLabels } from '../../data/categories';
 import '../../styles/global.css';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
@@ -55,7 +56,9 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
               />
             </a>
             <div class="p-5 sm:p-7">
-              <p class="text-xs font-medium uppercase tracking-[0.14em] text-emerald-800">{post.data.category}</p>
+              <p class="text-xs font-medium uppercase tracking-[0.14em] text-emerald-800">
+                {categoryLabels[post.data.category]}
+              </p>
               <p class="mt-3 text-xs text-stone-500">
                 {dateFormatter.format(post.data.pubDate)} · {post.data.author}
               </p>

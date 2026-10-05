@@ -45,6 +45,8 @@ The CMS also includes a **Produk** collection for editing product details and
 Shopee links in `src/data/products/`. Product images can be uploaded from the
 CMS to `public/images/products/`. Blog articles can select products from this
 collection in the `productIds` field; the CMS stores the selected product IDs.
+Blog and product forms share the same category options. Product search results
+show the category alongside each name to make related items easier to find.
 
 ### GitHub OAuth for a Vercel deployment
 
