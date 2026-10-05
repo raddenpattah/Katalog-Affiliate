@@ -1,7 +1,7 @@
 const ProductCatalogPreview = createClass({
   render() {
     const data = this.props.entry.get('data');
-    const imagePath = data.get('imageUrl');
+    const imagePath = data.get('image');
     const image = imagePath ? this.props.getAsset(imagePath).toString() : '';
     const shopeeUrl = data.get('shopeeUrl');
     const badge = data.get('badge');

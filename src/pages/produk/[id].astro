@@ -46,7 +46,7 @@ export async function getStaticPaths() {
 const { product, recommendations, relatedArticles } = Astro.props;
 const description = product.description?.trim()
   || `Pilihan ${categoryLabels[product.category].toLowerCase()} untuk mempercantik ruang. Lihat detail dan penawaran produk ini di Shopee.`;
-const socialImage = Astro.site ? new URL(product.imageUrl, Astro.site).href : product.imageUrl;
+const socialImage = Astro.site ? new URL(product.image, Astro.site).href : product.image;
 ---
 
 <html lang="id">
@@ -84,7 +84,7 @@ const socialImage = Astro.site ? new URL(product.imageUrl, Astro.site).href : pr
       <article class="grid gap-7 sm:gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-start lg:gap-16">
         <div class="relative overflow-hidden rounded-xl bg-stone-100">
           <img
-            src={product.imageUrl}
+            src={product.image}
             alt={product.title}
             class="aspect-[4/5] w-full object-cover sm:aspect-[4/3] lg:aspect-[4/5]"
             width="1200"

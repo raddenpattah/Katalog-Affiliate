@@ -6,7 +6,7 @@ export interface Product {
   id: string;
   title: string;
   category: ProductCategory;
-  imageUrl: string;
+  image: string;
   shopeeUrl: string;
   badge?: string;
   description?: string;

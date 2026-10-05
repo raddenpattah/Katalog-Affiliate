@@ -41,7 +41,7 @@ collections:
           - label: Aksesoris Ruang
             value: aksesoris
       - label: Gambar Produk
-        name: imageUrl
+        name: image
         widget: image
         media_folder: /public/images/products
         public_folder: /images/products
