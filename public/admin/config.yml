@@ -40,6 +40,8 @@ collections:
             value: lampu
           - label: Aksesoris Ruang
             value: aksesoris
+          - label: Lantai & Alas
+            value: lantai-dan-alas
       - label: Gambar Produk
         name: image
         widget: image
@@ -88,6 +90,8 @@ collections:
             value: lampu
           - label: Aksesoris Ruang
             value: aksesoris
+          - label: Lantai & Alas
+            value: lantai-dan-alas
       - label: Penulis
         name: author
         widget: string
