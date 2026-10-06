@@ -27,6 +27,10 @@ const blog = defineCollection({
     seoDescription: z.string().optional(),
     tags: z.array(z.string()).default([]),
     pubDate: z.coerce.date(),
+    publishAt: z.preprocess(
+      (value) => (value === '' || value === null ? undefined : value),
+      z.coerce.date().optional(),
+    ),
     heroImage: blogImageSchema,
     galleryImages: z.array(galleryImageSchema).default([]),
     category: categorySchema,

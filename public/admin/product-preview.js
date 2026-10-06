@@ -111,6 +111,8 @@ const BlogPostPreview = createClass({
     const tags = data.get('tags');
     const seoTitle = data.get('seoTitle');
     const seoDescription = data.get('seoDescription');
+    const publishAt = data.get('publishAt');
+    const isScheduled = publishAt && Date.parse(publishAt) > Date.now();
     const galleryItems = galleryImages
       ? galleryImages.toArray().map((item) => ({
           image: item.get('image'),
@@ -186,14 +188,14 @@ const BlogPostPreview = createClass({
                   'span',
                   {
                     style: {
-                      background: isDraft ? '#fef3c7' : '#f5f5f4',
+                      background: isDraft || isScheduled ? '#fef3c7' : '#f5f5f4',
                       borderRadius: '999px',
                       color: '#57534e',
                       fontSize: '11px',
                       padding: '3px 9px',
                     },
                   },
-                  isDraft ? 'Draft' : 'Siap terbit',
+                  isDraft ? 'Draft' : isScheduled ? 'Terjadwal' : 'Siap terbit',
                 ),
               ),
               h(
@@ -208,6 +210,14 @@ const BlogPostPreview = createClass({
                 ' · ',
                 data.get('author') || 'Alfeto',
               ),
+              publishAt &&
+                h(
+                  'p',
+                  { style: { color: '#78716c', fontSize: '12px', margin: '4px 0 0' } },
+                  'Jadwal: ',
+                  new Date(publishAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
+                  ' WIB',
+                ),
             ),
           ),
           h(

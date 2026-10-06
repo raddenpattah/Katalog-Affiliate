@@ -59,6 +59,27 @@ unchanged once it is used by products or articles; category deletion is disabled
 to prevent leaving those entries with invalid references. Product search results
 show the category alongside each name to make related items easier to find.
 
+### Scheduled blog publishing
+
+Set **Jadwal Terbit** in the blog editor to the date and time in the editor
+device's WIB (UTC+07:00) timezone. Leave it empty to publish the article on the
+next regular deploy. Scheduled articles stay hidden from the blog index and
+their direct URLs until their scheduled time. A GitHub Actions workflow checks
+for due posts every five minutes and triggers a Vercel deployment; the exact
+publish time can be delayed by the workflow queue and deployment duration.
+
+To enable automatic scheduled deployments:
+
+1. In Vercel, open the project **Settings > Git > Deploy Hooks**, create a hook
+   for the `main` branch, and copy its URL.
+2. In GitHub, open the repository **Settings > Secrets and variables >
+   Actions** and add a repository secret named `VERCEL_DEPLOY_HOOK` with that
+   URL.
+3. Ensure GitHub Actions is enabled for the repository.
+
+The workflow triggers one deployment for each set of due articles. Manual or
+CMS commits continue to deploy through the existing Git integration.
+
 ### GitHub OAuth for a Vercel deployment
 
 Vercel does not provide a built-in OAuth proxy for Decap's GitHub backend. Keep

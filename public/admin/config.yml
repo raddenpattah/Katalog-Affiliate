@@ -124,6 +124,15 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: false
         format: "YYYY-MM-DD"
+      - label: Jadwal Terbit
+        name: publishAt
+        widget: datetime
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm"
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+        picker_utc: false
+        hint: Waktu mengikuti zona waktu perangkat. Atur perangkat ke WIB (UTC+07:00); kosongkan agar artikel terbit saat deploy.
       - label: Gambar Utama
         name: heroImage
         widget: image
