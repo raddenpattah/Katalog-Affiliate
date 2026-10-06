@@ -88,6 +88,23 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
             <Content />
           </div>
         </div>
+        {post.data.galleryImages.length > 0 && (
+          <section
+            aria-label="Galeri gambar artikel"
+            class="grid gap-4 px-4 pb-8 sm:grid-cols-2 sm:px-8 sm:pb-10"
+          >
+            {post.data.galleryImages.map((image, index) => (
+              <img
+                src={image}
+                alt={`${post.data.title} — gambar ${index + 1}`}
+                class="aspect-[4/3] w-full rounded-2xl border border-stone-200 object-cover"
+                loading="lazy"
+                width="1200"
+                height="900"
+              />
+            ))}
+          </section>
+        )}
         {recommendedProducts.length > 0 && (
           <section class="border-t border-stone-200 bg-stone-50/70 px-4 pb-8 pt-8 sm:px-8 sm:pb-10 sm:pt-10">
             <h2 class="mb-5 text-2xl font-medium tracking-tight text-stone-900 sm:text-3xl">

@@ -5,6 +5,10 @@ import { isProductCategory } from './data/categories';
 const categorySchema = z.string().refine(isProductCategory, {
   message: 'Kategori harus tersedia di koleksi Kategori.',
 });
+const blogImageSchema = z.union([
+  z.string().url(),
+  z.string().regex(/^\/images\/blog\/.+/),
+]);
 
 const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
@@ -12,10 +16,8 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    heroImage: z.union([
-      z.string().url(),
-      z.string().regex(/^\/images\/blog\/.+/),
-    ]),
+    heroImage: blogImageSchema,
+    galleryImages: z.array(blogImageSchema).default([]),
     category: categorySchema,
     author: z.string().default('Alfeto'),
     productIds: z.array(z.string()).default([]),

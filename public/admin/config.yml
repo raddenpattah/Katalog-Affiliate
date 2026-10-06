@@ -109,6 +109,14 @@ collections:
       - label: Gambar Utama
         name: heroImage
         widget: image
+      - label: Galeri Gambar
+        name: galleryImages
+        widget: list
+        required: false
+        field:
+          label: Gambar
+          name: image
+          widget: image
       - label: Kategori
         name: category
         widget: relation
