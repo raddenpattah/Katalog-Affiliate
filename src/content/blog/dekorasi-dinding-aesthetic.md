@@ -36,7 +36,3 @@ Susun beberapa foto atau ilustrasi dengan palet warna yang senada. Atur jarak an
 ## 5. Lengkapi dengan pencahayaan hangat
 
 Lampu dinding atau lampu meja bernuansa warm white dapat menonjolkan tekstur panel dan membuat suasana kamar lebih nyaman pada malam hari.
-
-## Rekomendasi produk dinding
-
-Lihat pilihan produk yang digunakan sebagai inspirasi artikel ini di bawah.

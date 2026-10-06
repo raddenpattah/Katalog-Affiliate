@@ -84,20 +84,10 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
         </div>
         {recommendedProducts.length > 0 && (
           <section class="border-t border-stone-200 bg-stone-50/70 px-4 pb-8 pt-8 sm:px-8 sm:pb-10 sm:pt-10">
-            <div class="mb-5 flex items-end justify-between gap-4">
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
-                  Inspirasi lanjut
-                </p>
-                <h2 class="mt-2 text-2xl font-medium tracking-tight text-stone-900 sm:text-3xl">
-                  Rekomendasi produk
-                </h2>
-              </div>
-            </div>
-            <p class="text-sm leading-6 text-stone-600">
-              Pilihan dekorasi yang dibahas dalam artikel ini.
-            </p>
-            <div class="mt-5 grid grid-cols-2 gap-3 sm:gap-5">
+            <h2 class="mb-5 text-2xl font-medium tracking-tight text-stone-900 sm:text-3xl">
+              Produk dalam Artikel Ini
+            </h2>
+            <div class="grid grid-cols-2 gap-3 sm:gap-5">
               {recommendedProducts.map((product) => <ProductCard product={product} />)}
             </div>
           </section>
