@@ -3,9 +3,9 @@ title: '5 Ide Dekorasi Dinding Kamar Aesthetic yang Hemat Budget'
 description: 'Ubah dinding kamar polos jadi lebih estetik dan cozy dengan WPC wall panel, cermin gantung, dan rak kayu minimalis.'
 pubDate: 2026-10-05
 heroImage: '/images/blog/5-inpirasi-kamar-yang-polos-menjadi-lebih-estetik.jpeg'
-category: 'dinding'
 author: 'Alfeto Decor'
 advanced:
+  category: dinding
   productIds:
     - wpc-wood-wall-panel
     - cermin-dinding-gantung-aesthetic

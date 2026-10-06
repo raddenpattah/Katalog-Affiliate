@@ -49,8 +49,10 @@ captions; the images are uploaded to `public/images/blog/` and displayed below
 the article body. These optional settings, including SEO title and description,
 tags, scheduled publishing, gallery images, and related products, are grouped
 under the collapsible **Pengaturan Lanjutan** section in the blog editor. Blog
-articles can select products from the Produk collection; the CMS stores the
-selected product IDs.
+author is fixed to **Alfeto**. The category field is in **Pengaturan Lanjutan**
+to keep the main editor form compact; it still labels the article and helps
+prioritize related products. Blog articles can select products from the Produk
+collection; the CMS stores the selected product IDs.
 Blog and product forms use the same managed category collection. To add a
 category, open **Kategori** in the CMS, create an entry with a lowercase slug
 ID (letters, numbers, and hyphens, such as `dekorasi-kamar`) and a display name.

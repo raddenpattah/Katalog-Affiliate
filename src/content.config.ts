@@ -22,6 +22,7 @@ const publishAtSchema = z.preprocess(
   z.coerce.date().optional(),
 );
 const advancedBlogSettingsSchema = z.object({
+  category: categorySchema.optional(),
   publishAt: publishAtSchema,
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
@@ -38,7 +39,7 @@ const blog = defineCollection({
       description: z.string(),
       pubDate: z.coerce.date(),
       heroImage: blogImageSchema,
-      category: categorySchema,
+      category: categorySchema.optional(),
       author: z.string().default('Alfeto'),
       draft: z.boolean().default(false),
       advanced: advancedBlogSettingsSchema.default({}),
@@ -49,17 +50,27 @@ const blog = defineCollection({
       galleryImages: z.array(galleryImageSchema).optional(),
       productIds: z.array(z.string()).optional(),
     })
-    .transform(({ advanced, publishAt, seoTitle, seoDescription, tags, galleryImages, productIds, ...post }) => ({
-      ...post,
-      advanced: {
-        publishAt: advanced.publishAt ?? publishAt,
-        seoTitle: advanced.seoTitle ?? seoTitle,
-        seoDescription: advanced.seoDescription ?? seoDescription,
-        tags: advanced.tags ?? tags ?? [],
-        galleryImages: advanced.galleryImages ?? galleryImages ?? [],
-        productIds: advanced.productIds ?? productIds ?? [],
-      },
-    })),
+    .transform(({ advanced, category, publishAt, seoTitle, seoDescription, tags, galleryImages, productIds, ...post }) => {
+      const resolvedCategory = advanced.category ?? category;
+      if (!resolvedCategory) {
+        throw new Error(`Blog post "${post.title}" must have a category.`);
+      }
+
+      return {
+        ...post,
+        author: 'Alfeto',
+        category: resolvedCategory,
+        advanced: {
+          ...advanced,
+          publishAt: advanced.publishAt ?? publishAt,
+          seoTitle: advanced.seoTitle ?? seoTitle,
+          seoDescription: advanced.seoDescription ?? seoDescription,
+          tags: advanced.tags ?? tags ?? [],
+          galleryImages: advanced.galleryImages ?? galleryImages ?? [],
+          productIds: advanced.productIds ?? productIds ?? [],
+        },
+      };
+    }),
 });
 
 const produk = defineCollection({

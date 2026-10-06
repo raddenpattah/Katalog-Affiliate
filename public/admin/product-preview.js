@@ -113,6 +113,7 @@ const BlogPostPreview = createClass({
     const seoTitle = advanced && advanced.get('seoTitle');
     const seoDescription = advanced && advanced.get('seoDescription');
     const publishAt = advanced && advanced.get('publishAt');
+    const category = advanced && advanced.get('category');
     const isScheduled = publishAt && Date.parse(publishAt) > Date.now();
     const galleryItems = galleryImages
       ? galleryImages.toArray().map((item) => ({
@@ -183,7 +184,7 @@ const BlogPostPreview = createClass({
                       padding: '3px 9px',
                     },
                   },
-                  categoryLabels[data.get('category')] || data.get('category') || 'Tanpa kategori',
+                  categoryLabels[category] || category || 'Tanpa kategori',
                 ),
                 h(
                   'span',
@@ -209,7 +210,7 @@ const BlogPostPreview = createClass({
                 { style: { color: '#78716c', fontSize: '12px', margin: '0' } },
                 data.get('pubDate') || 'Tanggal belum diatur',
                 ' · ',
-                data.get('author') || 'Alfeto',
+                'Alfeto',
               ),
               publishAt &&
                 h(

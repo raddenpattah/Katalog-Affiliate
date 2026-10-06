@@ -109,20 +109,6 @@ collections:
       - label: Gambar Utama
         name: heroImage
         widget: image
-      - label: Kategori
-        name: category
-        widget: relation
-        collection: categories
-        search_fields:
-          - title
-          - id
-        value_field: id
-        display_fields:
-          - title
-      - label: Penulis
-        name: author
-        widget: string
-        default: Alfeto
       - label: Draft
         name: draft
         widget: boolean
@@ -135,6 +121,16 @@ collections:
         widget: object
         collapsed: true
         fields:
+          - label: Kategori
+            name: category
+            widget: relation
+            collection: categories
+            search_fields:
+              - title
+              - id
+            value_field: id
+            display_fields:
+              - title
           - label: Jadwal Terbit
             name: publishAt
             widget: datetime
