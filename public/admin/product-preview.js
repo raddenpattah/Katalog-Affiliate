@@ -107,6 +107,18 @@ const BlogPostPreview = createClass({
     const image = imagePath ? this.props.getAsset(imagePath).toString() : '';
     const productIds = data.get('productIds');
     const isDraft = data.get('draft');
+    const galleryImages = data.get('galleryImages');
+    const tags = data.get('tags');
+    const seoTitle = data.get('seoTitle');
+    const seoDescription = data.get('seoDescription');
+    const galleryItems = galleryImages
+      ? galleryImages.toArray().map((item) => ({
+          image: item.get('image'),
+          alt: item.get('alt'),
+          caption: item.get('caption'),
+        }))
+      : [];
+    const tagItems = tags ? tags.toArray() : [];
 
     return h(
       'main',
@@ -168,7 +180,7 @@ const BlogPostPreview = createClass({
                       padding: '3px 9px',
                     },
                   },
-                  categoryLabels[data.get('category')] || 'Tanpa kategori',
+                  categoryLabels[data.get('category')] || data.get('category') || 'Tanpa kategori',
                 ),
                 h(
                   'span',
@@ -204,6 +216,46 @@ const BlogPostPreview = createClass({
             data.get('description') || 'Deskripsi artikel akan tampil di sini.',
           ),
           h(
+            'section',
+            {
+              style: {
+                background: '#f5f5f4',
+                borderRadius: '8px',
+                fontSize: '12px',
+                lineHeight: '1.6',
+                marginTop: '12px',
+                padding: '10px',
+              },
+            },
+            h('strong', {}, 'Preview SEO'),
+            h('div', {}, seoTitle || data.get('title') || 'Judul SEO akan tampil di sini.'),
+            h(
+              'div',
+              { style: { color: '#57534e' } },
+              seoDescription || data.get('description') || 'Deskripsi SEO akan tampil di sini.',
+            ),
+          ),
+          tagItems.length > 0 &&
+            h(
+              'div',
+              { style: { display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' } },
+              tagItems.map((tag) =>
+                h(
+                  'span',
+                  {
+                    style: {
+                      background: '#f5f5f4',
+                      borderRadius: '999px',
+                      color: '#57534e',
+                      fontSize: '11px',
+                      padding: '3px 9px',
+                    },
+                  },
+                  tag,
+                ),
+              ),
+            ),
+          h(
             'p',
             { style: { color: '#57534e', fontSize: '12px', lineHeight: '1.6', margin: '10px 0 0' } },
             h('strong', {}, 'ID produk terkait: '),
@@ -216,6 +268,40 @@ const BlogPostPreview = createClass({
           h('h2', { style: { fontSize: '16px', margin: '0 0 10px' } }, 'Isi artikel'),
           this.props.widgetFor('body'),
         ),
+        galleryItems.length > 0 &&
+          h(
+            'section',
+            { style: { borderTop: '1px solid #e7e5e4', padding: '16px' } },
+            h('h2', { style: { fontSize: '16px', margin: '0 0 10px' } }, 'Galeri gambar'),
+            h(
+              'div',
+              { style: { display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' } },
+              galleryItems.map(({ image: galleryImage, alt, caption }) =>
+                h(
+                  'figure',
+                  { style: { margin: '0' } },
+                  galleryImage &&
+                    h('img', {
+                      src: this.props.getAsset(galleryImage).toString(),
+                      alt: alt || '',
+                      style: {
+                        aspectRatio: '4 / 3',
+                        border: '1px solid #e7e5e4',
+                        borderRadius: '8px',
+                        objectFit: 'cover',
+                        width: '100%',
+                      },
+                    }),
+                  h(
+                    'figcaption',
+                    { style: { color: '#57534e', fontSize: '12px', marginTop: '6px' } },
+                    h('div', {}, h('strong', {}, 'Alt: '), alt || 'Belum diisi'),
+                    caption && h('div', {}, caption),
+                  ),
+                ),
+              ),
+            ),
+          ),
       ),
     );
   },

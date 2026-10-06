@@ -100,6 +100,24 @@ collections:
       - label: Deskripsi
         name: description
         widget: text
+      - label: Judul SEO
+        name: seoTitle
+        widget: string
+        required: false
+        hint: Jika kosong, judul artikel dipakai sebagai judul SEO.
+      - label: Deskripsi SEO
+        name: seoDescription
+        widget: text
+        required: false
+        hint: Jika kosong, deskripsi artikel dipakai sebagai deskripsi SEO.
+      - label: Tags
+        name: tags
+        widget: list
+        required: false
+        field:
+          label: Tag
+          name: tag
+          widget: string
       - label: Tanggal Terbit
         name: pubDate
         widget: datetime
@@ -113,10 +131,18 @@ collections:
         name: galleryImages
         widget: list
         required: false
-        field:
-          label: Gambar
-          name: image
-          widget: image
+        fields:
+          - label: Gambar
+            name: image
+            widget: image
+          - label: Alt Text
+            name: alt
+            widget: string
+            hint: Deskripsikan isi gambar untuk aksesibilitas.
+          - label: Caption
+            name: caption
+            widget: text
+            required: false
       - label: Kategori
         name: category
         widget: relation

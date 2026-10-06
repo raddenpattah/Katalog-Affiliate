@@ -9,15 +9,26 @@ const blogImageSchema = z.union([
   z.string().url(),
   z.string().regex(/^\/images\/blog\/.+/),
 ]);
+const galleryImageSchema = z.union([
+  blogImageSchema,
+  z.object({
+    image: blogImageSchema,
+    alt: z.string().trim().min(1),
+    caption: z.string().optional(),
+  }),
+]);
 
 const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+    tags: z.array(z.string()).default([]),
     pubDate: z.coerce.date(),
     heroImage: blogImageSchema,
-    galleryImages: z.array(blogImageSchema).default([]),
+    galleryImages: z.array(galleryImageSchema).default([]),
     category: categorySchema,
     author: z.string().default('Alfeto'),
     productIds: z.array(z.string()).default([]),

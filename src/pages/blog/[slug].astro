@@ -18,6 +18,13 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const seoTitle = post.data.seoTitle?.trim() || post.data.title;
+const seoDescription = post.data.seoDescription?.trim() || post.data.description;
+const galleryImages = post.data.galleryImages.map((image, index) =>
+  typeof image === 'string'
+    ? { image, alt: `${post.data.title} — gambar ${index + 1}`, caption: undefined }
+    : image,
+);
 const recommendedProducts = post.data.productIds.map((productId) => {
   const product = products.find(({ id }) => id === productId);
 
@@ -45,13 +52,14 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="p:domain_verify" content="63cbf7dea4ba5f9335e79eecc975eb9a" />
-    <meta name="description" content={post.data.description} />
-    <title>{post.data.title} | Alfeto — Kurasi &amp; Inspirasi Dekorasi Ruang Aesthetic</title>
+    <meta name="description" content={seoDescription} />
+    <meta name="keywords" content={post.data.tags.join(', ')} />
+    <title>{seoTitle} | Alfeto — Kurasi &amp; Inspirasi Dekorasi Ruang Aesthetic</title>
     <meta property="og:image" content={post.data.heroImage} />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Alfeto" />
-    <meta property="og:title" content={`${post.data.title} | Alfeto`} />
-    <meta property="og:description" content={post.data.description} />
+    <meta property="og:title" content={`${seoTitle} | Alfeto`} />
+    <meta property="og:description" content={seoDescription} />
     <meta property="og:locale" content="id_ID" />
   </head>
   <body id="top" class="min-h-screen bg-[#faf9f6] font-sans antialiased text-gray-900">
@@ -75,6 +83,15 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
           <p class="mt-5 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
             {post.data.description}
           </p>
+          {post.data.tags.length > 0 && (
+            <ul class="mt-5 flex flex-wrap gap-2" aria-label="Tag artikel">
+              {post.data.tags.map((tag) => (
+                <li class="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          )}
           <img
             src={post.data.heroImage}
             alt={`Inspirasi ${post.data.category.toLowerCase()} — ${post.data.title}`}
@@ -88,20 +105,27 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
             <Content />
           </div>
         </div>
-        {post.data.galleryImages.length > 0 && (
+        {galleryImages.length > 0 && (
           <section
             aria-label="Galeri gambar artikel"
             class="grid gap-4 px-4 pb-8 sm:grid-cols-2 sm:px-8 sm:pb-10"
           >
-            {post.data.galleryImages.map((image, index) => (
-              <img
-                src={image}
-                alt={`${post.data.title} — gambar ${index + 1}`}
-                class="aspect-[4/3] w-full rounded-2xl border border-stone-200 object-cover"
-                loading="lazy"
-                width="1200"
-                height="900"
-              />
+            {galleryImages.map(({ image, alt, caption }) => (
+              <figure class="min-w-0">
+                <img
+                  src={image}
+                  alt={alt}
+                  class="aspect-[4/3] w-full rounded-2xl border border-stone-200 object-cover"
+                  loading="lazy"
+                  width="1200"
+                  height="900"
+                />
+                {caption && (
+                  <figcaption class="mt-2 text-center text-sm leading-6 text-stone-600">
+                    {caption}
+                  </figcaption>
+                )}
+              </figure>
             ))}
           </section>
         )}
