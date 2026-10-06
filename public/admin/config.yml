@@ -115,7 +115,7 @@ collections:
         default: false
       - label: Isi Artikel
         name: body
-        widget: markdown
+        widget: ai-markdown
       - label: Pengaturan Lanjutan
         name: advanced
         widget: object

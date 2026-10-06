@@ -62,6 +62,30 @@ unchanged once it is used by products or articles; category deletion is disabled
 to prevent leaving those entries with invalid references. Product search results
 show the category alongside each name to make related items easier to find.
 
+### AI article generation
+
+The blog Markdown editor includes **✨ Generate Artikel AI**. It sends the
+current title and category to the same-origin `/api/generate-blog` Vercel
+Function, then replaces the article body with generated Markdown. Review and
+edit the result before publishing.
+
+For local development, copy `.env.example` to `.env.local` and set
+`GEMINI_API_KEY` to a valid server-side Gemini API key. Run the Vercel
+development runtime (for example, `npx vercel dev`) to serve the `/api`
+function locally; `astro dev` alone only serves the static Astro site. Set
+`ENABLE_AI_GENERATOR=true` to enable generation; any value other than the exact
+string `true` disables the endpoint. In Vercel, add `ENABLE_AI_GENERATOR` and
+`GEMINI_API_KEY` under **Project Settings > Environment Variables**, then
+redeploy. Never add the real API key to source control or expose it as a
+`PUBLIC_` environment variable.
+
+The Gemini provider defaults to `gemini-2.5-flash` via `GEMINI_MODEL`. The
+requested `gemini-1.5-flash` is no longer listed among Google's current Gemini
+API models, so the current stable Flash model is used by default. Provider
+selection is abstracted in `api/lib/ai-provider.js`; add a provider there and
+select it with the optional `AI_PROVIDER` environment variable when another
+provider is implemented.
+
 ### Scheduled blog publishing
 
 Set **Jadwal Terbit** in the blog editor to the date and time in the editor
