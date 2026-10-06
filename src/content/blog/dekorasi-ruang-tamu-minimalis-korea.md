@@ -10,6 +10,7 @@ productIds:
   - Rak Ambalan
   - cermin-dinding-gantung-aesthetic
   - Karpet Lantai
+  - Lampu lantai berdiri
 draft: false
 ---
 
