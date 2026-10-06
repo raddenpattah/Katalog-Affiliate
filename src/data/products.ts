@@ -1,4 +1,4 @@
-import { categoryLabels, productCategories, type ProductCategory } from './categories';
+import { categoryLabels, isProductCategory, type ProductCategory } from './categories';
 
 export { categoryLabels, productCategories, type ProductCategory } from './categories';
 
@@ -16,10 +16,6 @@ const productFiles = import.meta.glob<Product>('./products/*.json', {
   eager: true,
   import: 'default',
 });
-
-function isProductCategory(value: string): value is ProductCategory {
-  return productCategories.some((category) => category === value);
-}
 
 export const products: Product[] = Object.values(productFiles).map((product, index) => {
   if (!isProductCategory(product.category)) {

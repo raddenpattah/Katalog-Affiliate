@@ -9,6 +9,25 @@ media_folder: public/images/blog
 public_folder: /images/blog
 
 collections:
+  - name: categories
+    label: Kategori
+    folder: src/data/category-options
+    create: true
+    delete: false
+    extension: json
+    format: json
+    identifier_field: title
+    slug: "{{id}}"
+    fields:
+      - label: ID Kategori
+        name: id
+        widget: string
+        pattern:
+          - '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          - Gunakan huruf kecil, angka, dan tanda hubung. Contoh: dekorasi-kamar
+      - label: Nama Kategori
+        name: title
+        widget: string
   - name: products
     label: Produk
     folder: src/data/products
@@ -46,18 +65,14 @@ collections:
         required: false
       - label: Kategori
         name: category
-        widget: select
-        options:
-          - label: Dinding & Panel
-            value: dinding
-          - label: Tanaman & Pot
-            value: tanaman
-          - label: Lampu & Cermin
-            value: lampu
-          - label: Aksesoris Ruang
-            value: aksesoris
-          - label: Lantai & Alas
-            value: lantai-dan-alas
+        widget: relation
+        collection: categories
+        search_fields:
+          - title
+          - id
+        value_field: id
+        display_fields:
+          - title
       - label: Gambar Produk
         name: image
         widget: image
@@ -96,18 +111,14 @@ collections:
         widget: image
       - label: Kategori
         name: category
-        widget: select
-        options:
-          - label: Dinding & Panel
-            value: dinding
-          - label: Tanaman & Pot
-            value: tanaman
-          - label: Lampu & Cermin
-            value: lampu
-          - label: Aksesoris Ruang
-            value: aksesoris
-          - label: Lantai & Alas
-            value: lantai-dan-alas
+        widget: relation
+        collection: categories
+        search_fields:
+          - title
+          - id
+        value_field: id
+        display_fields:
+          - title
       - label: Penulis
         name: author
         widget: string

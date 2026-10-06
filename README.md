@@ -29,7 +29,7 @@ npm run preview
 - `/contact` — formulir kontak yang membuka aplikasi surel pengunjung
 - `/privacy-policy` — kebijakan privasi dan informasi tautan rekomendasi
 
-Product details and Shopee URLs are in `src/data/products.ts`. Replace the sample search URLs with your product links before publishing. Product categories are `dinding`, `tanaman`, `lampu`, `aksesoris`, and `lantai-dan-alas`. Add blog entries as `.md` or `.mdx` files under `src/content/blog/`, with `title`, `description`, and `pubDate` frontmatter. Draft posts can be hidden from the public blog by setting `draft: true`.
+Product details and Shopee URLs are in `src/data/products.ts`. Replace the sample search URLs with your product links before publishing. The initial category data is in `src/data/category-options/`; the CMS-managed category collection is the source for category choices on the site. Add blog entries as `.md` or `.mdx` files under `src/content/blog/`, with `title`, `description`, and `pubDate` frontmatter. Draft posts can be hidden from the public blog by setting `draft: true`.
 
 ## Blog CMS
 
@@ -45,7 +45,13 @@ The CMS also includes a **Produk** collection for editing product details and
 Shopee links in `src/data/products/`. Product images can be uploaded from the
 CMS to `public/images/products/`. Blog articles can select products from this
 collection in the `productIds` field; the CMS stores the selected product IDs.
-Blog and product forms share the same category options. Product search results
+Blog and product forms use the same managed category collection. To add a
+category, open **Kategori** in the CMS, create an entry with a lowercase slug
+ID (letters, numbers, and hyphens, such as `dekorasi-kamar`) and a display name.
+The new category becomes available in product and blog forms and appears in the
+public catalog filters after the content commit is deployed. Keep the ID
+unchanged once it is used by products or articles; category deletion is disabled
+to prevent leaving those entries with invalid references. Product search results
 show the category alongside each name to make related items easier to find.
 
 ### GitHub OAuth for a Vercel deployment

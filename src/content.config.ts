@@ -1,6 +1,10 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { productCategories } from './data/categories';
+import { isProductCategory } from './data/categories';
+
+const categorySchema = z.string().refine(isProductCategory, {
+  message: 'Kategori harus tersedia di koleksi Kategori.',
+});
 
 const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
@@ -12,7 +16,7 @@ const blog = defineCollection({
       z.string().url(),
       z.string().regex(/^\/images\/blog\/.+/),
     ]),
-    category: z.enum(productCategories),
+    category: categorySchema,
     author: z.string().default('Alfeto'),
     productIds: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
@@ -24,7 +28,7 @@ const produk = defineCollection({
   schema: z.object({
     id: z.string(),
     title: z.string(),
-    category: z.enum(productCategories),
+    category: categorySchema,
     image: z.union([z.string().url(), z.string().regex(/^\/images\/products\/.+/)]),
     shopeeUrl: z.string().url(),
     badge: z.string().optional(),
