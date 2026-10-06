@@ -4,15 +4,28 @@
 
   function readCurrentField(labelText) {
     var labels = document.querySelectorAll('label');
+    var expectedLabel = labelText.trim().toLocaleLowerCase();
     for (var index = 0; index < labels.length; index += 1) {
       var label = labels[index];
-      if (label.textContent.trim() !== labelText) continue;
+      if (label.textContent.trim().toLocaleLowerCase() !== expectedLabel) continue;
 
       var control = label.htmlFor ? document.getElementById(label.htmlFor) : null;
       if (!control && label.parentElement) {
         control = label.parentElement.querySelector('input, textarea, select, [role="combobox"]');
       }
-      if (control && typeof control.value === 'string') return control.value.trim();
+      if (control && typeof control.value === 'string' && control.value.trim()) {
+        return control.value.trim();
+      }
+
+      var container = label.parentElement;
+      for (var level = 0; container && level < 4; level += 1, container = container.parentElement) {
+        var selectedValue = container.querySelector(
+          '[class*="SingleValue"], [class*="singleValue"], [class*="value-label"]',
+        );
+        if (selectedValue && selectedValue.textContent.trim()) {
+          return selectedValue.textContent.trim();
+        }
+      }
     }
     return '';
   }
