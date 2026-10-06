@@ -17,6 +17,22 @@ collections:
     format: json
     identifier_field: title
     slug: "{{slug}}"
+    view_filters:
+      - label: Dinding & Panel
+        field: category
+        pattern: dinding
+      - label: Tanaman & Pot
+        field: category
+        pattern: tanaman
+      - label: Lampu & Cermin
+        field: category
+        pattern: lampu
+      - label: Aksesoris Ruang
+        field: category
+        pattern: aksesoris
+      - label: Lantai & Alas
+        field: category
+        pattern: lantai-dan-alas
     fields:
       - label: ID Produk
         name: id

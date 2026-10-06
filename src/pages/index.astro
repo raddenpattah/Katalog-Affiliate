@@ -55,9 +55,7 @@ import '../styles/global.css';
             <h2 class="text-xl font-medium tracking-tight text-stone-950 sm:text-2xl">
               Katalog Dekorasi
             </h2>
-            <p class="shrink-0 text-xs text-stone-500 sm:text-sm" data-product-count aria-live="polite">
-              {products.length} produk
-            </p>
+            <p class="shrink-0 text-xs text-stone-500 sm:text-sm">{products.length} pilihan</p>
           </div>
 
           <div class="-mx-4 overflow-x-auto px-4 py-2 md:mx-0 md:overflow-visible md:px-0 md:py-0">
@@ -68,7 +66,7 @@ import '../styles/global.css';
                 aria-pressed="true"
                 class="rounded-full border border-stone-900 bg-stone-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-500 focus-visible:ring-offset-2 sm:text-sm"
               >
-                Semua
+                ALL
               </button>
               {productCategories.map((category) => (
                 <button
@@ -89,7 +87,7 @@ import '../styles/global.css';
           </div>
         </div>
 
-        <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 sm:gap-y-9 lg:grid-cols-3">
+        <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 sm:gap-y-9 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => <ProductCard product={product} />)}
         </div>
       </section>
@@ -105,12 +103,10 @@ import '../styles/global.css';
     <script>
       const filterButtons = document.querySelectorAll<HTMLButtonElement>('[data-category-filter]');
       const productCards = document.querySelectorAll<HTMLElement>('[data-product-category]');
-      const productCount = document.querySelector<HTMLElement>('[data-product-count]');
 
       filterButtons.forEach((button) => {
         button.addEventListener('click', () => {
           const selectedCategory = button.dataset.categoryFilter;
-          let visibleProductCount = 0;
 
           filterButtons.forEach((filterButton) => {
             const isSelected = filterButton === button;
@@ -124,16 +120,10 @@ import '../styles/global.css';
           });
 
           productCards.forEach((card) => {
-            const isVisible =
-              selectedCategory === 'all' ||
-              card.dataset.productCategory === selectedCategory;
-            card.hidden = !isVisible;
-            if (isVisible) visibleProductCount += 1;
+            card.hidden =
+              selectedCategory !== 'all' &&
+              card.dataset.productCategory !== selectedCategory;
           });
-
-          if (productCount) {
-            productCount.textContent = `${visibleProductCount} produk`;
-          }
         });
       });
     </script>
