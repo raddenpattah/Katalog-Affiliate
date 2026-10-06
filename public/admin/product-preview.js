@@ -276,7 +276,7 @@ const BlogPostPreview = createClass({
         ),
         h(
           'section',
-          { style: { fontSize: '14px', lineHeight: '1.7', padding: '16px' } },
+          { className: 'blog-preview-content', style: { fontSize: '14px', lineHeight: '1.7', padding: '16px' } },
           h('h2', { style: { fontSize: '16px', margin: '0 0 10px' } }, 'Isi artikel'),
           this.props.widgetFor('body'),
         ),

@@ -101,7 +101,7 @@ collections:
         widget: string
       - label: Deskripsi
         name: description
-        widget: text
+        widget: ai-description
       - label: Tanggal Terbit
         name: pubDate
         widget: datetime
@@ -154,7 +154,7 @@ collections:
             hint: Jika kosong, deskripsi artikel dipakai sebagai deskripsi SEO.
           - label: Tags
             name: tags
-            widget: list
+            widget: ai-tags
             required: false
             field:
               label: Tag

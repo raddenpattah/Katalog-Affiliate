@@ -76,8 +76,11 @@ in the GitHub repository.
 
 The blog Markdown editor includes **✨ Generate Artikel AI**. It sends the
 current title and category to the same-origin `/api/generate-blog` Vercel
-Function, then replaces the article body with generated Markdown. Review and
-edit the result before publishing.
+Function, then fills the article body, description, and tags. Existing
+descriptions and tags are preserved; generation only fills those fields when
+they are empty. Review and edit the result before publishing.
+The CMS preview pane renders the Markdown body using Decap's Markdown preview
+and styles it to resemble the published article text.
 
 For local development, copy `.env.example` to `.env.local` and set
 `GEMINI_API_KEY` to a valid server-side Gemini API key. Run the Vercel

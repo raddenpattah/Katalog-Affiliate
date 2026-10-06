@@ -1,6 +1,8 @@
 (function () {
   var markdownWidget = CMS.resolveWidget('markdown');
   var MarkdownControl = markdownWidget && markdownWidget.control;
+  var MarkdownPreview = markdownWidget && markdownWidget.preview;
+  var metadataEventName = 'alfeto:generated-blog-metadata';
 
   function readCurrentField(labelText) {
     var labels = document.querySelectorAll('label');
@@ -36,9 +38,60 @@
     return typeof value === 'string' ? value.trim() : '';
   }
 
+  function createMetadataControl(widgetName, metadataKey, isEmpty) {
+    var widget = CMS.resolveWidget(widgetName);
+    var BaseControl = widget && widget.control;
+    if (!BaseControl) return null;
+
+    return createClass({
+      getInitialState: function () {
+        return { controlVersion: 0 };
+      },
+
+      componentDidMount: function () {
+        window.addEventListener(metadataEventName, this.handleGeneratedMetadata);
+      },
+
+      componentWillUnmount: function () {
+        window.removeEventListener(metadataEventName, this.handleGeneratedMetadata);
+      },
+
+      handleGeneratedMetadata: function (event) {
+        var value = event.detail && event.detail[metadataKey];
+        if (value && isEmpty(this.props.value)) {
+          this.props.onChange(value);
+          this.setState({ controlVersion: this.state.controlVersion + 1 });
+        }
+      },
+
+      render: function () {
+        return h(BaseControl, Object.assign({}, this.props, { key: this.state.controlVersion }));
+      },
+    });
+  }
+
+  var AIDescriptionControl = createMetadataControl('text', 'description', function (value) {
+    return typeof value !== 'string' || !value.trim();
+  });
+  var AITagsControl = createMetadataControl('list', 'tags', function (value) {
+    var tags = value && typeof value.toArray === 'function' ? value.toArray() : value;
+    return !Array.isArray(tags) || tags.length === 0 || tags.every(function (tag) {
+      return typeof tag !== 'string' || !tag.trim();
+    });
+  });
+
   var AIArticleControl = createClass({
     getInitialState: function () {
-      return { loading: false, message: '', error: false };
+      return { loading: false, message: '', error: false, editorVersion: 0, pendingEditorValue: null };
+    },
+
+    componentDidUpdate: function () {
+      if (this.state.pendingEditorValue && this.props.value === this.state.pendingEditorValue) {
+        this.setState({
+          editorVersion: this.state.editorVersion + 1,
+          pendingEditorValue: null,
+        });
+      }
     },
 
     generateArticle: async function () {
@@ -66,12 +119,28 @@
         if (!response.ok) {
           throw new Error(result.error || 'Artikel tidak dapat dibuat.');
         }
-        if (typeof result.article !== 'string' || !result.article.trim()) {
-          throw new Error('Server tidak mengembalikan isi artikel.');
+        if (
+          typeof result.article !== 'string' ||
+          !result.article.trim() ||
+          typeof result.description !== 'string' ||
+          !result.description.trim() ||
+          !Array.isArray(result.tags)
+        ) {
+          throw new Error('Server tidak mengembalikan artikel beserta metadata yang lengkap.');
         }
 
-        this.props.onChange(result.article);
-        this.setState({ message: 'Artikel berhasil dibuat. Periksa kembali sebelum menerbitkan.', error: false });
+        this.setState({ pendingEditorValue: result.article }, function () {
+          this.props.onChange(result.article);
+          window.dispatchEvent(
+            new CustomEvent(metadataEventName, {
+              detail: { description: result.description, tags: result.tags },
+            }),
+          );
+          this.setState({
+            message: 'Artikel, deskripsi, dan tags dibuat. Field yang sudah terisi tetap dipertahankan.',
+            error: false,
+          });
+        });
       } catch (error) {
         this.setState({
           message: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat artikel.',
@@ -122,10 +191,14 @@
               )
             : null,
         ),
-        MarkdownControl ? h(MarkdownControl, this.props) : h('p', null, 'Editor Markdown tidak tersedia.'),
+        MarkdownControl
+          ? h(MarkdownControl, Object.assign({}, this.props, { key: this.state.editorVersion }))
+          : h('p', null, 'Editor Markdown tidak tersedia.'),
       );
     },
   });
 
-  CMS.registerWidget('ai-markdown', AIArticleControl);
+  CMS.registerWidget('ai-markdown', AIArticleControl, MarkdownPreview);
+  if (AIDescriptionControl) CMS.registerWidget('ai-description', AIDescriptionControl);
+  if (AITagsControl) CMS.registerWidget('ai-tags', AITagsControl);
 })();

@@ -29,8 +29,8 @@ export default async function handler(request, response) {
   }
 
   try {
-    const article = await generateArticle({ title, category });
-    return response.status(200).json({ article });
+    const generated = await generateArticle({ title, category });
+    return response.status(200).json(generated);
   } catch (error) {
     console.error('AI article generation failed:', error);
     const missingApiKey = error instanceof Error && error.message === 'GEMINI_API_KEY is not configured';
