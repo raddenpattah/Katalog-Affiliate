@@ -1,13 +1,15 @@
 ---
-title: '5 Inspirasi Dekorasi Ruang Tamu Minimalis Aesthetic ala Korea'
-description: 'Buat ruang tamu mungil terasa lebih hangat dan lapang dengan inspirasi dekorasi minimalis ala Korea, mulai dari rak melayang hingga cermin.'
+title: 5 Inspirasi Dekorasi Ruang Tamu Minimalis Aesthetic ala Korea
+description: Buat ruang tamu mungil terasa lebih hangat dan lapang dengan
+  inspirasi dekorasi minimalis ala Korea, mulai dari rak melayang hingga cermin.
 pubDate: 2026-10-06
-heroImage: '/images/blog/5-inpirasi-kamar-yang-polos-menjadi-lebih-estetik.jpeg'
-category: 'aksesoris'
-author: 'Alfeto Decor'
+heroImage: /images/blog/inspirasi-dekorasi-ruang-tamu-minimalis-aesthetic-ala-korea.jpeg
+category: aksesoris
+author: Alfeto Decor
 productIds:
   - Rak Ambalan
   - cermin-dinding-gantung-aesthetic
+  - Karpet Lantai
 draft: false
 ---
 
