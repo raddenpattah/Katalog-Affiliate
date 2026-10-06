@@ -24,7 +24,7 @@ collections:
         widget: string
         pattern:
           - '^[a-z0-9]+(?:-[a-z0-9]+)*$'
-          - Gunakan huruf kecil, angka, dan tanda hubung. Contoh: dekorasi-kamar
+          - 'Gunakan huruf kecil, angka, dan tanda hubung. Contoh: dekorasi-kamar'
       - label: Nama Kategori
         name: title
         widget: string
