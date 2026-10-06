@@ -46,10 +46,11 @@ Shopee links in `src/data/products/`. Product images can be uploaded from the
 CMS to `public/images/products/`. Blog articles support a **Galeri Gambar**
 field for adding any number of additional images with alt text and optional
 captions; the images are uploaded to `public/images/blog/` and displayed below
-the article body. The blog editor also supports optional SEO title and
-description fields, plus tags displayed on article pages and blog cards. Blog
-articles can also select products from the Produk collection in the
-`productIds` field; the CMS stores the selected product IDs.
+the article body. These optional settings, including SEO title and description,
+tags, scheduled publishing, gallery images, and related products, are grouped
+under the collapsible **Pengaturan Lanjutan** section in the blog editor. Blog
+articles can select products from the Produk collection; the CMS stores the
+selected product IDs.
 Blog and product forms use the same managed category collection. To add a
 category, open **Kategori** in the CMS, create an entry with a lowercase slug
 ID (letters, numbers, and hyphens, such as `dekorasi-kamar`) and a display name.

@@ -35,7 +35,8 @@ const duePosts = listBlogFiles(postsDirectory).flatMap((path) => {
   const frontmatter = content.match(/^---\s*\n([\s\S]*?)\n---(?:\s*\n|$)/)?.[1];
   if (!frontmatter || /^\s*draft:\s*true\s*$/m.test(frontmatter)) return [];
 
-  const publishAt = frontmatter.match(/^publishAt:\s*(.*?)\s*$/m)?.[1];
+  const publishAt = frontmatter.match(/^\s+publishAt:\s*(.*?)\s*$/m)?.[1]
+    ?? frontmatter.match(/^publishAt:\s*(.*?)\s*$/m)?.[1];
   if (!publishAt) return [];
 
   return parsePublishAt(publishAt, path) <= now ? [`${path}:${publishAt}`] : [];

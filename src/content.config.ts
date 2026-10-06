@@ -17,27 +17,49 @@ const galleryImageSchema = z.union([
     caption: z.string().optional(),
   }),
 ]);
+const publishAtSchema = z.preprocess(
+  (value) => (value === '' || value === null ? undefined : value),
+  z.coerce.date().optional(),
+);
+const advancedBlogSettingsSchema = z.object({
+  publishAt: publishAtSchema,
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  galleryImages: z.array(galleryImageSchema).optional(),
+  productIds: z.array(z.string()).optional(),
+});
 
 const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    seoTitle: z.string().optional(),
-    seoDescription: z.string().optional(),
-    tags: z.array(z.string()).default([]),
-    pubDate: z.coerce.date(),
-    publishAt: z.preprocess(
-      (value) => (value === '' || value === null ? undefined : value),
-      z.coerce.date().optional(),
-    ),
-    heroImage: blogImageSchema,
-    galleryImages: z.array(galleryImageSchema).default([]),
-    category: categorySchema,
-    author: z.string().default('Alfeto'),
-    productIds: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-  }),
+  schema: z
+    .object({
+      title: z.string(),
+      description: z.string(),
+      pubDate: z.coerce.date(),
+      heroImage: blogImageSchema,
+      category: categorySchema,
+      author: z.string().default('Alfeto'),
+      draft: z.boolean().default(false),
+      advanced: advancedBlogSettingsSchema.default({}),
+      publishAt: publishAtSchema,
+      seoTitle: z.string().optional(),
+      seoDescription: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      galleryImages: z.array(galleryImageSchema).optional(),
+      productIds: z.array(z.string()).optional(),
+    })
+    .transform(({ advanced, publishAt, seoTitle, seoDescription, tags, galleryImages, productIds, ...post }) => ({
+      ...post,
+      advanced: {
+        publishAt: advanced.publishAt ?? publishAt,
+        seoTitle: advanced.seoTitle ?? seoTitle,
+        seoDescription: advanced.seoDescription ?? seoDescription,
+        tags: advanced.tags ?? tags ?? [],
+        galleryImages: advanced.galleryImages ?? galleryImages ?? [],
+        productIds: advanced.productIds ?? productIds ?? [],
+      },
+    })),
 });
 
 const produk = defineCollection({

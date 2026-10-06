@@ -6,11 +6,12 @@ pubDate: 2026-10-06
 heroImage: /images/blog/inspirasi-dekorasi-ruang-tamu-minimalis-aesthetic-ala-korea.jpeg
 category: aksesoris
 author: Alfeto Decor
-productIds:
-  - Rak Ambalan
-  - cermin-dinding-gantung-aesthetic
-  - Karpet Lantai
-  - Lampu lantai berdiri
+advanced:
+  productIds:
+    - Rak Ambalan
+    - cermin-dinding-gantung-aesthetic
+    - Karpet Lantai
+    - Lampu lantai berdiri
 draft: false
 ---
 

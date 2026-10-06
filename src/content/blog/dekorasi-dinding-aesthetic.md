@@ -5,9 +5,10 @@ pubDate: 2026-10-05
 heroImage: '/images/blog/5-inpirasi-kamar-yang-polos-menjadi-lebih-estetik.jpeg'
 category: 'dinding'
 author: 'Alfeto Decor'
-productIds:
-  - wpc-wood-wall-panel
-  - cermin-dinding-gantung-aesthetic
+advanced:
+  productIds:
+    - wpc-wood-wall-panel
+    - cermin-dinding-gantung-aesthetic
 draft: false
 ---
 

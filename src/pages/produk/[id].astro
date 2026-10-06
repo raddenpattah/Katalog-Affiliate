@@ -2,12 +2,14 @@
 import { getCollection } from 'astro:content';
 import ProductCard from '../../components/ProductCard.astro';
 import { categoryLabels } from '../../data/categories';
+import { isBlogPostPublished } from '../../data/blog-publication';
 import '../../styles/global.css';
 
 export async function getStaticPaths() {
+  const buildTime = new Date();
   const [entries, posts] = await Promise.all([
     getCollection('produk'),
-    getCollection('blog', ({ data }) => !data.draft),
+    getCollection('blog', ({ data }) => isBlogPostPublished(data, buildTime)),
   ]);
   const getStableOrder = (value: string) =>
     [...value].reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0, 0);
@@ -27,9 +29,9 @@ export async function getStaticPaths() {
       .map((item) => item.data);
     const relatedArticles = [...posts]
       .sort((a, b) => {
-        const aRelevance = Number(a.data.productIds.includes(entry.data.id)) * 2
+        const aRelevance = Number(a.data.advanced.productIds.includes(entry.data.id)) * 2
           + Number(a.data.category === entry.data.category);
-        const bRelevance = Number(b.data.productIds.includes(entry.data.id)) * 2
+        const bRelevance = Number(b.data.advanced.productIds.includes(entry.data.id)) * 2
           + Number(b.data.category === entry.data.category);
         return bRelevance - aRelevance || b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
       })
