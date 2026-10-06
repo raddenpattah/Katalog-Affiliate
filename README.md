@@ -62,6 +62,16 @@ unchanged once it is used by products or articles; category deletion is disabled
 to prevent leaving those entries with invalid references. Product search results
 show the category alongside each name to make related items easier to find.
 
+Decap's **Editorial Workflow** is enabled for all CMS collections. Saving a
+new article with **Save draft** creates a review branch and GitHub pull
+request; the change does not reach the production branch until that request is
+merged. The same review flow applies to products and categories. Review the
+article in its pull request, set its **Draft** field to off when it is ready
+for readers, then publish/merge it. The **Draft** field defaults to on for new
+articles and keeps them hidden from the public site even if their changes are
+merged before they are ready. Editors need permission to create pull requests
+in the GitHub repository.
+
 ### AI article generation
 
 The blog Markdown editor includes **✨ Generate Artikel AI**. It sends the

@@ -5,6 +5,8 @@ backend:
   base_url: https://alfeto-decap-auth.alfeto.workers.dev
   auth_endpoint: /auth
 
+publish_mode: editorial_workflow
+
 media_folder: public/images/blog
 public_folder: /images/blog
 
@@ -112,7 +114,7 @@ collections:
       - label: Draft
         name: draft
         widget: boolean
-        default: false
+        default: true
       - label: Isi Artikel
         name: body
         widget: ai-markdown
