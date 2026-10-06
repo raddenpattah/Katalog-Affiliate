@@ -89,9 +89,8 @@ string `true` disables the endpoint. In Vercel, add `ENABLE_AI_GENERATOR` and
 redeploy. Never add the real API key to source control or expose it as a
 `PUBLIC_` environment variable.
 
-The Gemini provider defaults to `gemini-2.5-flash` via `GEMINI_MODEL`. The
-requested `gemini-1.5-flash` is no longer listed among Google's current Gemini
-API models, so the current stable Flash model is used by default. Provider
+The Gemini provider defaults to `gemini-3.8-flash` via `GEMINI_MODEL`, matching
+the current model recommended by Google's API for new users. Provider
 selection is abstracted in `api/lib/ai-provider.js`; add a provider there and
 select it with the optional `AI_PROVIDER` environment variable when another
 provider is implemented.

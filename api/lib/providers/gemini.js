@@ -14,7 +14,7 @@ export async function generateWithGemini({ title, category }) {
 
   const client = new GoogleGenerativeAI(apiKey);
   const model = client.getGenerativeModel({
-    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
     systemInstruction: systemPrompt,
     generationConfig: {
       temperature: 0.75,
