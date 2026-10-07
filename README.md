@@ -81,6 +81,11 @@ and tags when generation finishes. Existing descriptions and tags are
 preserved; generation only fills those fields when they are empty. Review and
 edit the result before publishing. The function uses Gemini's
 `gemini-3.8-flash` model and streams newline-delimited JSON events.
+Transient Gemini server errors (HTTP 5xx) are retried up to three times with
+exponential delays before trying `GEMINI_FALLBACK_MODEL` (defaults to
+`gemini-3.6-flash`). Set that variable to a model available to your API key if
+the default fallback is unavailable. Client errors such as HTTP 400 and 403
+are not retried.
 The CMS preview pane renders the Markdown body using Decap's Markdown preview
 and styles it to resemble the published article text.
 
