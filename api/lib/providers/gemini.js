@@ -130,7 +130,9 @@ async function generateWithRetries(client, modelName, prompt, startTime) {
   }
 }
 
-export async function generateWithGemini({ title, category, onArticleChunk = () => {} }) {
+export async function generateWithGemini({ title, category, onArticleChunk = () => {}, options = {} }) {
+  const primaryModel = (options.model && String(options.model).trim()) || PRIMARY_MODEL;
+  const fallbackModel = (options.fallbackModel && String(options.fallbackModel).trim()) || FALLBACK_MODEL;
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not configured');
@@ -142,32 +144,32 @@ export async function generateWithGemini({ title, category, onArticleChunk = () 
   const prompt = `Buat artikel blog berdasarkan informasi berikut.\n\nJudul: ${title}\nKategori: ${category}`;
   let generated;
   try {
-    generated = await generateWithRetries(client, PRIMARY_MODEL, prompt, startTime);
+    generated = await generateWithRetries(client, primaryModel, prompt, startTime);
   } catch (primaryError) {
     const primaryStatus = getHttpStatus(primaryError);
     if (
       primaryStatus === 400 ||
       primaryStatus === 403 ||
       (!isRetryableServerError(primaryError) && primaryStatus !== 404) ||
-      FALLBACK_MODEL === PRIMARY_MODEL
+      fallbackModel === primaryModel
     ) {
       throw primaryError;
     }
 
     if (!canContinue(startTime)) {
       console.warn(
-        `Gemini ${PRIMARY_MODEL} failed but time budget exhausted (remaining ${formatRemaining(startTime)}); aborting fallback.`,
+        `Gemini ${primaryModel} failed but time budget exhausted (remaining ${formatRemaining(startTime)}); aborting fallback.`,
       );
       throw new Error(
-        `AI generation time budget exhausted before fallback (${PRIMARY_MODEL} -> ${FALLBACK_MODEL})`,
+        `AI generation time budget exhausted before fallback (${primaryModel} -> ${fallbackModel})`,
         { cause: primaryError },
       );
     }
 
     console.warn(
-      `Gemini ${PRIMARY_MODEL} failed with HTTP ${primaryStatus}; falling back to ${FALLBACK_MODEL} (remaining ${formatRemaining(startTime)}).`,
+      `Gemini ${primaryModel} failed with HTTP ${primaryStatus}; falling back to ${fallbackModel} (remaining ${formatRemaining(startTime)}).`,
     );
-    generated = await generateWithRetries(client, FALLBACK_MODEL, prompt, startTime);
+    generated = await generateWithRetries(client, fallbackModel, prompt, startTime);
   }
 
   onArticleChunk(generated.article);

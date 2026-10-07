@@ -124,7 +124,8 @@ async function generateWithRetries(client, modelName, prompt, startTime) {
   }
 }
 
-export async function generateWithGroq({ title, category, onArticleChunk = () => {} }) {
+export async function generateWithGroq({ title, category, onArticleChunk = () => {}, options = {} }) {
+  const model = (options.model && String(options.model).trim()) || GROQ_MODEL;
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw new Error('GROQ_API_KEY is not configured');
@@ -134,7 +135,7 @@ export async function generateWithGroq({ title, category, onArticleChunk = () =>
   const client = new Groq({ apiKey, timeout: REQUEST_TIMEOUT_MS, maxRetries: 0 });
   const prompt = `Buat artikel blog berdasarkan informasi berikut.\n\nJudul: ${title}\nKategori: ${category}`;
 
-  const generated = await generateWithRetries(client, GROQ_MODEL, prompt, startTime);
+  const generated = await generateWithRetries(client, model, prompt, startTime);
 
   onArticleChunk(generated.article);
   return generated;
