@@ -38,6 +38,71 @@
     return typeof value === 'string' ? value.trim() : '';
   }
 
+  async function readArticleStream(response, onArticleText) {
+    if (!response.body || typeof response.body.getReader !== 'function') {
+      throw new Error('Browser ini tidak mendukung streaming artikel.');
+    }
+
+    var reader = response.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
+    var article = '';
+    var metadata = null;
+    var completed = false;
+
+    function processLine(line) {
+      if (!line.trim()) return;
+
+      var event;
+      try {
+        event = JSON.parse(line);
+      } catch (error) {
+        throw new Error('Server mengirim potongan artikel dengan format yang tidak valid.');
+      }
+
+      if (event.type === 'article' && typeof event.text === 'string') {
+        article += event.text;
+        onArticleText(article);
+      } else if (
+        event.type === 'metadata' &&
+        typeof event.description === 'string' &&
+        Array.isArray(event.tags)
+      ) {
+        metadata = { description: event.description, tags: event.tags };
+      } else if (event.type === 'error') {
+        throw new Error(event.error || 'Artikel tidak dapat dibuat.');
+      } else if (event.type === 'done') {
+        completed = true;
+      }
+    }
+
+    try {
+      while (true) {
+        var chunk = await reader.read();
+        buffer += decoder.decode(chunk.value || new Uint8Array(), { stream: !chunk.done });
+
+        var lines = buffer.split('\n');
+        buffer = lines.pop();
+        lines.forEach(processLine);
+
+        if (chunk.done) break;
+      }
+      if (buffer.trim()) processLine(buffer);
+    } finally {
+      reader.releaseLock();
+    }
+
+    if (!completed || !article.trim() || !metadata || !metadata.description.trim()) {
+      throw new Error('Server tidak mengembalikan artikel beserta metadata yang lengkap.');
+    }
+
+    return {
+      article: article,
+      description: metadata.description,
+      tags: metadata.tags,
+    };
+  }
+
   function createMetadataControl(widgetName, metadataKey, isEmpty) {
     var widget = CMS.resolveWidget(widgetName);
     var BaseControl = widget && widget.control;
@@ -108,17 +173,24 @@
         return;
       }
 
-      this.setState({ loading: true, message: '', error: false });
+      var previousArticle = typeof this.props.value === 'string' ? this.props.value : '';
+      var streamedArticle = false;
+      this.setState({ loading: true, message: 'Artikel sedang dibuat…', error: false });
       try {
         var response = await fetch('/api/generate-blog', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: title, category: category }),
         });
-        var result = await response.json();
         if (!response.ok) {
-          throw new Error(result.error || 'Artikel tidak dapat dibuat.');
+          var errorResult = await response.json();
+          throw new Error(errorResult.error || 'Artikel tidak dapat dibuat.');
         }
+        var result = await readArticleStream(response, function (articleText) {
+          streamedArticle = true;
+          this.props.onChange(articleText);
+        }.bind(this));
+
         if (
           typeof result.article !== 'string' ||
           !result.article.trim() ||
@@ -142,6 +214,7 @@
           });
         });
       } catch (error) {
+        if (streamedArticle) this.props.onChange(previousArticle);
         this.setState({
           message: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat artikel.',
           error: true,

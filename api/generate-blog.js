@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { generateArticle } from './lib/ai-provider.js';
 
 const MAX_TITLE_LENGTH = 200;
@@ -28,14 +30,33 @@ export default async function handler(request, response) {
     return response.status(400).json({ error: 'Title or category is too long' });
   }
 
+  if (!process.env.GEMINI_API_KEY) {
+    return response.status(503).json({ error: 'AI generation is not configured' });
+  }
+
+  response.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-cache, no-transform');
+  response.setHeader('X-Content-Type-Options', 'nosniff');
+
+  const sendEvent = event => response.write(`${JSON.stringify(event)}\n`);
+  response.flushHeaders?.();
+
   try {
-    const generated = await generateArticle({ title, category });
-    return response.status(200).json(generated);
+    const generated = await generateArticle({
+      title,
+      category,
+      onArticleChunk: text => sendEvent({ type: 'article', text }),
+    });
+    sendEvent({
+      type: 'metadata',
+      description: generated.description,
+      tags: generated.tags,
+    });
+    sendEvent({ type: 'done' });
+    return response.end();
   } catch (error) {
     console.error('AI article generation failed:', error);
-    const missingApiKey = error instanceof Error && error.message === 'GEMINI_API_KEY is not configured';
-    return response
-      .status(missingApiKey ? 503 : 502)
-      .json({ error: missingApiKey ? 'AI generation is not configured' : 'Unable to generate the article right now' });
+    sendEvent({ type: 'error', error: 'Unable to generate the article right now' });
+    return response.end();
   }
 }

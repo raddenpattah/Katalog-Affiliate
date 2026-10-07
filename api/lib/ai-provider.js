@@ -4,7 +4,7 @@ const providers = {
   gemini: generateWithGemini,
 };
 
-export async function generateArticle({ title, category }) {
+export async function generateArticle({ title, category, onArticleChunk }) {
   const providerName = process.env.AI_PROVIDER || 'gemini';
   const provider = providers[providerName];
 
@@ -12,5 +12,5 @@ export async function generateArticle({ title, category }) {
     throw new Error(`Unsupported AI provider: ${providerName}`);
   }
 
-  return provider({ title, category });
+  return provider({ title, category, onArticleChunk });
 }

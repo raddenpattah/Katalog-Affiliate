@@ -76,9 +76,11 @@ in the GitHub repository.
 
 The blog Markdown editor includes **✨ Generate Artikel AI**. It sends the
 current title and category to the same-origin `/api/generate-blog` Vercel
-Function, then fills the article body, description, and tags. Existing
-descriptions and tags are preserved; generation only fills those fields when
-they are empty. Review and edit the result before publishing.
+Function, then streams the article body into the editor and fills description
+and tags when generation finishes. Existing descriptions and tags are
+preserved; generation only fills those fields when they are empty. Review and
+edit the result before publishing. The function uses Gemini's
+`gemini-1.5-flash` model and streams newline-delimited JSON events.
 The CMS preview pane renders the Markdown body using Decap's Markdown preview
 and styles it to resemble the published article text.
 
@@ -91,12 +93,48 @@ string `true` disables the endpoint. In Vercel, add `ENABLE_AI_GENERATOR` and
 `GEMINI_API_KEY` under **Project Settings > Environment Variables**, then
 redeploy. Never add the real API key to source control or expose it as a
 `PUBLIC_` environment variable.
+The generator's model is currently fixed to `gemini-1.5-flash`; a
+`GEMINI_MODEL` environment variable does not override it.
 
-The Gemini provider defaults to `gemini-3.8-flash` via `GEMINI_MODEL`, matching
-the current model recommended by Google's API for new users. Provider
-selection is abstracted in `api/lib/ai-provider.js`; add a provider there and
-select it with the optional `AI_PROVIDER` environment variable when another
-provider is implemented.
+The Vercel function is configured with a 60-second maximum duration. The
+browser reads the response as a `ReadableStream`; each newline-delimited JSON
+event has type `article`, `metadata`, `done`, or `error`. For example:
+
+```js
+const response = await fetch('/api/generate-blog', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ title, category }),
+});
+
+if (!response.ok) {
+  throw new Error((await response.json()).error || 'Article generation failed');
+}
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+let buffer = '';
+
+while (true) {
+  const { value, done } = await reader.read();
+  buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+  const lines = buffer.split('\n');
+  buffer = lines.pop();
+
+  for (const line of lines) {
+    if (!line) continue;
+    const event = JSON.parse(line);
+    if (event.type === 'article') appendArticleText(event.text);
+    if (event.type === 'error') throw new Error(event.error);
+  }
+
+  if (done) break;
+}
+```
+
+Provider selection is abstracted in `api/lib/ai-provider.js`; add a provider
+there and select it with the optional `AI_PROVIDER` environment variable when
+another provider is implemented.
 
 ### Scheduled blog publishing
 
