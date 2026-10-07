@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
 const systemPrompt = `Anda adalah penulis artikel blog berbahasa Indonesia yang ahli dalam dekorasi rumah dan interior estetik.
 Gunakan bahasa yang santai, jelas, hangat, dan persuasif tanpa membuat klaim yang tidak berdasar.
@@ -8,29 +8,28 @@ Selain isi artikel, buat deskripsi ringkas untuk ringkasan/SEO dan 5 tags releva
 Kembalikan hanya JSON valid dengan bentuk {"article":"isi artikel Markdown","description":"ringkasan artikel","tags":["tag 1","tag 2"]}.
 Jangan masukkan heading H1 ke dalam article dan jangan menambahkan teks di luar JSON.`;
 
-const PRIMARY_MODEL = 'gemini-3.8-flash';
-const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.6-flash';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const RETRY_DELAYS_MS = [1000, 2000, 4000];
 
-// Time budget untuk mencegah Vercel timeout 60 detik.
 const TIME_BUDGET_MS = Number(process.env.AI_TIME_BUDGET_MS) || 45000;
-// Kalau sisa waktu kurang dari ini, jangan retry/fallback.
 const MIN_TIME_FOR_RETRY_MS = 15000;
 
-// Timeout per request ke Gemini. Kalau request menggantung lebih dari ini, SDK akan abort.
+// Timeout per request ke Groq. Kalau request menggantung lebih dari ini, SDK akan abort.
 const REQUEST_TIMEOUT_MS = Number(process.env.AI_REQUEST_TIMEOUT_MS) || 20000;
 
 function getHttpStatus(error) {
-  return typeof error?.status === 'number' ? error.status : null;
+  if (typeof error?.status === 'number') return error.status;
+  if (typeof error?.response?.status === 'number') return error.response.status;
+  return null;
 }
 
 function isRetryableServerError(error) {
   const status = getHttpStatus(error);
-  if (status !== null && status >= 500 && status < 600) {
+  // Retry untuk 5xx dan 429 (rate limit)
+  if (status !== null && ((status >= 500 && status < 600) || status === 429)) {
     return true;
   }
-  // Bug @google/generative-ai 0.24.1: 503 dilempar sebagai "fetch failed" tanpa status.
-  // Anggap fetch failed sebagai retryable karena Gemini sering overload.
+  // Network error
   const message = error?.message || '';
   if (status === null && (message.includes('fetch failed') || message.includes('ECONNRESET') || message.includes('ETIMEDOUT'))) {
     return true;
@@ -59,7 +58,7 @@ function parseGeneratedArticle(responseText) {
   try {
     generated = JSON.parse(responseText);
   } catch (error) {
-    throw new Error('Gemini returned invalid article metadata', { cause: error });
+    throw new Error('Groq returned invalid article metadata', { cause: error });
   }
 
   const article = typeof generated.article === 'string'
@@ -71,39 +70,34 @@ function parseGeneratedArticle(responseText) {
     : [];
 
   if (!article || !description || tags.length === 0) {
-    throw new Error('Gemini returned incomplete article metadata');
+    throw new Error('Groq returned incomplete article metadata');
   }
 
   return { article, description, tags };
 }
 
 async function generateWithModel(client, modelName, prompt) {
-  const model = client.getGenerativeModel({
+  const completion = await client.chat.completions.create({
     model: modelName,
-    systemInstruction: systemPrompt,
-    generationConfig: {
-      temperature: 0.75,
-      maxOutputTokens: 2048,
-      responseMimeType: 'application/json',
-    },
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: prompt },
+    ],
+    temperature: 0.75,
+    max_tokens: 2048,
+    response_format: { type: 'json_object' },
   });
-  const result = await model.generateContentStream(prompt, { timeout: REQUEST_TIMEOUT_MS });
-  let responseText = '';
 
-  for await (const chunk of result.stream) {
-    responseText += chunk.text();
-  }
-
+  const responseText = completion?.choices?.[0]?.message?.content || '';
   return parseGeneratedArticle(responseText);
 }
 
-// Retry transient Gemini server errors with exponential backoff; never retry 4xx errors.
 async function generateWithRetries(client, modelName, prompt, startTime) {
   for (let retry = 0; ; retry += 1) {
     const attempt = retry + 1;
     try {
       console.info(
-        `Generating Gemini article with ${modelName} (attempt ${attempt}/${RETRY_DELAYS_MS.length + 1}, remaining ${formatRemaining(startTime)}).`,
+        `Generating Groq article with ${modelName} (attempt ${attempt}/${RETRY_DELAYS_MS.length + 1}, remaining ${formatRemaining(startTime)}).`,
       );
       return await generateWithModel(client, modelName, prompt);
     } catch (error) {
@@ -113,62 +107,34 @@ async function generateWithRetries(client, modelName, prompt, startTime) {
 
       if (!canContinue(startTime)) {
         console.warn(
-          `Gemini ${modelName} attempt ${attempt} failed but time budget exhausted (remaining ${formatRemaining(startTime)}); aborting retry.`,
+          `Groq ${modelName} attempt ${attempt} failed but time budget exhausted (remaining ${formatRemaining(startTime)}); aborting retry.`,
         );
         throw new Error(
-          `AI generation time budget exhausted before retry (${modelName})`,
+          `AI generation time budget exhausted before retry (groq:${modelName})`,
           { cause: error },
         );
       }
 
       const delay = RETRY_DELAYS_MS[retry];
       console.warn(
-        `Gemini ${modelName} attempt ${attempt} failed with HTTP ${getHttpStatus(error) ?? 'network/fetch'}; retrying in ${delay}ms (remaining ${formatRemaining(startTime)}).`,
+        `Groq ${modelName} attempt ${attempt} failed with HTTP ${getHttpStatus(error) ?? 'network'}; retrying in ${delay}ms (remaining ${formatRemaining(startTime)}).`,
       );
       await wait(delay);
     }
   }
 }
 
-export async function generateWithGemini({ title, category, onArticleChunk = () => {} }) {
-  const apiKey = process.env.GEMINI_API_KEY;
+export async function generateWithGroq({ title, category, onArticleChunk = () => {} }) {
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured');
+    throw new Error('GROQ_API_KEY is not configured');
   }
 
   const startTime = Date.now();
-
-  const client = new GoogleGenerativeAI(apiKey);
+  const client = new Groq({ apiKey, timeout: REQUEST_TIMEOUT_MS, maxRetries: 0 });
   const prompt = `Buat artikel blog berdasarkan informasi berikut.\n\nJudul: ${title}\nKategori: ${category}`;
-  let generated;
-  try {
-    generated = await generateWithRetries(client, PRIMARY_MODEL, prompt, startTime);
-  } catch (primaryError) {
-    const primaryStatus = getHttpStatus(primaryError);
-    if (
-      primaryStatus === 400 ||
-      primaryStatus === 403 ||
-      (!isRetryableServerError(primaryError) && primaryStatus !== 404) ||
-      FALLBACK_MODEL === PRIMARY_MODEL
-    ) {
-      throw primaryError;
-    }
 
-    if (!canContinue(startTime)) {
-      console.warn(
-        `Gemini ${PRIMARY_MODEL} failed but time budget exhausted (remaining ${formatRemaining(startTime)}); aborting fallback.`,
-      );
-      throw new Error(
-        `AI generation time budget exhausted before fallback (${PRIMARY_MODEL} -> ${FALLBACK_MODEL})`,
-        { cause: primaryError },
-      );
-    }
-
-    console.warn(
-      `Gemini ${PRIMARY_MODEL} failed with HTTP ${primaryStatus}; falling back to ${FALLBACK_MODEL} (remaining ${formatRemaining(startTime)}).`,
-    );
-    generated = await generateWithRetries(client, FALLBACK_MODEL, prompt, startTime);
-  }
+  const generated = await generateWithRetries(client, GROQ_MODEL, prompt, startTime);
 
   onArticleChunk(generated.article);
   return generated;

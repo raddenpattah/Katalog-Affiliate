@@ -122,7 +122,11 @@ const BlogPostPreview = createClass({
           caption: item.get('caption'),
         }))
       : [];
-    const tagItems = tags ? tags.toArray() : [];
+    const tagItems = tags
+      ? (typeof tags.toArray === 'function'
+          ? tags.toArray()
+          : Array.isArray(tags) ? tags : [])
+      : [];
 
     return h(
       'main',

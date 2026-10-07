@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "astro",
+  "devCommand": "npx serve dist -l $PORT",
   "functions": {
     "api/generate-blog.js": {
       "maxDuration": 60

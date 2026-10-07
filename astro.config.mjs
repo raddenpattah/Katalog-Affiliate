@@ -10,6 +10,5 @@ export default defineConfig({
   integrations: [tailwind(), mdx()],
   server: {
     host: true,
-    port: 4321,
   },
 });

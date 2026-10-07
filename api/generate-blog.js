@@ -5,6 +5,20 @@ import { generateArticle } from './lib/ai-provider.js';
 const MAX_TITLE_LENGTH = 200;
 const MAX_CATEGORY_LENGTH = 100;
 
+// Cek apakah minimal ada satu provider AI yang dikonfigurasi.
+function hasAnyProviderConfigured() {
+  const order = (process.env.AI_PROVIDER_ORDER || process.env.AI_PROVIDER || 'gemini,groq')
+    .split(',')
+    .map(name => name.trim())
+    .filter(Boolean);
+
+  for (const name of order) {
+    if (name === 'gemini' && process.env.GEMINI_API_KEY) return true;
+    if (name === 'groq' && process.env.GROQ_API_KEY) return true;
+  }
+  return false;
+}
+
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');
@@ -30,8 +44,8 @@ export default async function handler(request, response) {
     return response.status(400).json({ error: 'Title or category is too long' });
   }
 
-  if (!process.env.GEMINI_API_KEY) {
-    return response.status(503).json({ error: 'AI generation is not configured' });
+  if (!hasAnyProviderConfigured()) {
+    return response.status(503).json({ error: 'AI generation is not configured (tidak ada provider AI yang punya API key)' });
   }
 
   response.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
