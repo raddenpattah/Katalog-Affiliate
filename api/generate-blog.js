@@ -56,7 +56,10 @@ export default async function handler(request, response) {
     return response.end();
   } catch (error) {
     console.error('AI article generation failed:', error);
-    sendEvent({ type: 'error', error: 'Unable to generate the article right now' });
+    sendEvent({
+      type: 'error',
+      error: error instanceof Error ? error.message : 'Unable to generate the article right now',
+    });
     return response.end();
   }
 }

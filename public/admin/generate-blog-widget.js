@@ -38,27 +38,40 @@
     return typeof value === 'string' ? value.trim() : '';
   }
 
+  function processLine(line) {
+    if (!line.trim()) return null;
+
+    var event;
+    try {
+      event = JSON.parse(line);
+    } catch (error) {
+      throw new Error('Server mengirim potongan artikel dengan format yang tidak valid.', { cause: error });
+    }
+
+    if (!event || typeof event !== 'object' || typeof event.type !== 'string') {
+      throw new Error('Server mengirim event artikel yang tidak valid.');
+    }
+    if (event.type === 'error') {
+      throw new Error(typeof event.error === 'string' ? event.error : 'Artikel tidak dapat dibuat.');
+    }
+    return event;
+  }
+
   async function readArticleStream(response, onArticleText) {
     if (!response.body || typeof response.body.getReader !== 'function') {
       throw new Error('Browser ini tidak mendukung streaming artikel.');
     }
 
     var reader = response.body.getReader();
-    var decoder = new TextDecoder();
+    var decoder = new TextDecoder('utf-8');
     var buffer = '';
     var article = '';
     var metadata = null;
     var completed = false;
 
-    function processLine(line) {
-      if (!line.trim()) return;
-
-      var event;
-      try {
-        event = JSON.parse(line);
-      } catch (error) {
-        throw new Error('Server mengirim potongan artikel dengan format yang tidak valid.');
-      }
+    function handleLine(line) {
+      var event = processLine(line);
+      if (!event) return;
 
       if (event.type === 'article' && typeof event.text === 'string') {
         article += event.text;
@@ -69,8 +82,6 @@
         Array.isArray(event.tags)
       ) {
         metadata = { description: event.description, tags: event.tags };
-      } else if (event.type === 'error') {
-        throw new Error(event.error || 'Artikel tidak dapat dibuat.');
       } else if (event.type === 'done') {
         completed = true;
       }
@@ -78,16 +89,16 @@
 
     try {
       while (true) {
-        var chunk = await reader.read();
-        buffer += decoder.decode(chunk.value || new Uint8Array(), { stream: !chunk.done });
+        var { done, value } = await reader.read();
+        buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
 
         var lines = buffer.split('\n');
         buffer = lines.pop();
-        lines.forEach(processLine);
+        lines.forEach(handleLine);
 
-        if (chunk.done) break;
+        if (done) break;
       }
-      if (buffer.trim()) processLine(buffer);
+      if (buffer.trim()) handleLine(buffer);
     } finally {
       reader.releaseLock();
     }
@@ -101,6 +112,29 @@
       description: metadata.description,
       tags: metadata.tags,
     };
+  }
+
+  async function generateArticle(payload, onArticleText) {
+    var response = await fetch('/api/generate-blog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      var errorDetails = 'HTTP Error ' + response.status;
+      try {
+        var errorData = await response.json();
+        if (typeof errorData.error === 'string' && errorData.error) {
+          errorDetails = errorData.error;
+        }
+      } catch (error) {
+        // Keep the HTTP status when the error response is not JSON.
+      }
+      throw new Error(errorDetails);
+    }
+
+    return readArticleStream(response, onArticleText);
   }
 
   function createMetadataControl(widgetName, metadataKey, isEmpty) {
@@ -179,16 +213,7 @@
       this.setState({ loading: true, message: 'Artikel sedang dibuat…', error: false });
       try {
         console.log('Payload sent to API:', payload);
-        var res = await fetch('/api/generate-blog', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || `HTTP error! status: ${res.status}`);
-        }
-        var result = await readArticleStream(res, function (articleText) {
+        var result = await generateArticle(payload, function (articleText) {
           streamedArticle = true;
           this.props.onChange(articleText);
         }.bind(this));
@@ -217,6 +242,7 @@
         });
       } catch (error) {
         console.error('AI Generation Error Details:', error);
+        alert('Gagal generate: ' + (error instanceof Error ? error.message : String(error)));
         if (streamedArticle) this.props.onChange(previousArticle);
         this.setState({
           message: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat artikel.',
