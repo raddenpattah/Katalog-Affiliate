@@ -175,18 +175,20 @@
 
       var previousArticle = typeof this.props.value === 'string' ? this.props.value : '';
       var streamedArticle = false;
+      var payload = { title: title, category: category };
       this.setState({ loading: true, message: 'Artikel sedang dibuat…', error: false });
       try {
-        var response = await fetch('/api/generate-blog', {
+        console.log('Payload sent to API:', payload);
+        var res = await fetch('/api/generate-blog', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: title, category: category }),
+          body: JSON.stringify(payload),
         });
-        if (!response.ok) {
-          var errorResult = await response.json();
-          throw new Error(errorResult.error || 'Artikel tidak dapat dibuat.');
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || `HTTP error! status: ${res.status}`);
         }
-        var result = await readArticleStream(response, function (articleText) {
+        var result = await readArticleStream(res, function (articleText) {
           streamedArticle = true;
           this.props.onChange(articleText);
         }.bind(this));
@@ -214,6 +216,7 @@
           });
         });
       } catch (error) {
+        console.error('AI Generation Error Details:', error);
         if (streamedArticle) this.props.onChange(previousArticle);
         this.setState({
           message: error instanceof Error ? error.message : 'Terjadi kesalahan saat membuat artikel.',
