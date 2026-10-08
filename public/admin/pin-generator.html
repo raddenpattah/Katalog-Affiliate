@@ -368,6 +368,44 @@
 
     // Init
     renderPreviewCards();
+    prefillFromQuery();
+
+    // Baca query param & auto-isi form
+    // Contoh: /admin/pin-generator.html?title=Rak+Ambalan&category=Dekorasi&image=/images/blog/foto.jpg&cta=Simak+yuk
+    function prefillFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const title = params.get('title');
+      const category = params.get('category');
+      const image = params.get('image');
+      const cta = params.get('cta');
+
+      let filled = 0;
+
+      if (title) {
+        const el = $('title') || document.querySelector('[name="title"]') || document.querySelector('textarea');
+        if (el) { el.value = title; filled++; }
+      }
+
+      if (category) {
+        const el = $('category') || document.querySelector('[name="category"]') || document.querySelector('input[type="text"]:not([id*="title"])');
+        if (el) { el.value = category; filled++; }
+      }
+
+      if (image) {
+        const el = $('imageUrl') || document.querySelector('[name="imageUrl"]') || document.querySelector('input[type="url"], input[placeholder*="URL"], input[placeholder*="https"]');
+        if (el) { el.value = image; filled++; }
+      }
+
+      if (cta) {
+        const el = $('cta') || document.querySelector('[name="cta"]') || document.querySelector('input[placeholder*="CTA"], textarea[placeholder*="CTA"]');
+        if (el) { el.value = cta; filled++; }
+      }
+
+      if (filled > 0) {
+        console.log('[pin-generator] Prefill dari query param:', { title, category, image, cta, filled });
+        showStatus('✅ Form auto-isi dari artikel. Cek & klik Generate.', 'success');
+      }
+    }
   </script>
 </body>
 </html>
