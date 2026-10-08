@@ -1,5 +1,6 @@
 import { generatePin, AVAILABLE_STYLES } from '../lib/pin-generator.js';
 import { uploadPin, isBlobConfigured } from '../lib/blob-uploader.js';
+import { planLayout } from '../lib/ai-planner.js';
 
 export const maxDuration = 30;
 
@@ -34,6 +35,7 @@ export default async function handler(request, response) {
   const category = typeof body.category === 'string' ? body.category.trim() : 'Artikel';
   const style = typeof body.style === 'string' ? body.style.trim().toLowerCase() : 'minimalis';
   const shouldUpload = body.upload === true;
+  const pngBase64 = typeof body.pngBase64 === 'string' ? body.pngBase64 : null;
 
   if (!title || !imageUrl) {
     return response.status(400).json({ error: 'Title dan imageUrl wajib diisi' });
@@ -53,13 +55,22 @@ export default async function handler(request, response) {
     console.info(`[generate-pin] Render style="${style}" title="${title.slice(0, 40)}..."`);
     console.info(`[generate-pin] imageUrl="${imageUrl}" baseUrl="${baseUrl}"`);
 
-    const pngBuffer = await generatePin({
-      title,
-      imageUrl,
-      category,
-      style,
-      baseUrl,
-    });
+    let pngBuffer;
+
+    if (pngBase64 && shouldUpload) {
+      // Kalau ada pngBase64 + upload, langsung pakai — skip generate
+      console.info('[generate-pin] Pakai pngBase64 (skip generate)');
+      pngBuffer = Buffer.from(pngBase64, 'base64');
+    } else {
+      // Generate normal
+      pngBuffer = await generatePin({
+        title,
+        imageUrl,
+        category,
+        style,
+        baseUrl,
+      });
+    }
 
     // Kalau upload=true, upload ke Blob & return JSON
     if (shouldUpload) {
@@ -72,7 +83,16 @@ export default async function handler(request, response) {
       const filename = title.slice(0, 50) + '-' + style;
       const { url, pathname } = await uploadPin(pngBuffer, filename);
 
-      console.info(`[generate-pin] Upload sukses: ${url}`);
+      // Generate keywords (kalau pakai pngBase64, plan belum ada)
+      let keywords = [];
+      try {
+        const plan = await planLayout({ title, category, style });
+        keywords = (plan && plan.keywords) || [];
+      } catch (e) {
+        console.warn('[generate-pin] Keywords gagal:', e.message);
+      }
+
+      console.info(`[generate-pin] Upload sukses: ${url} | keywords: ${keywords.length}`);
 
       return response.status(200).json({
         url,
@@ -80,6 +100,7 @@ export default async function handler(request, response) {
         style,
         title,
         category,
+        keywords,
         uploadedAt: new Date().toISOString(),
       });
     }

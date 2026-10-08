@@ -192,6 +192,7 @@
         </div>
         <button id="generateBtn">✨ Generate Style Terpilih</button>
         <button id="clearBtn" class="secondary">Reset</button>
+        <button id="uploadExportBtn" style="background: #059669; color: white; margin-left: 8px; display: none;">☁️ Upload & Export CSV</button>
       </div>
     </div>
 
@@ -213,6 +214,9 @@
     ];
 
     let currentBlobs = {};
+    // State baru: simpan blob asli + metadata buat upload Blob & CSV
+    let pinMetadata = {};  // { styleKey: { blob, title, category, style, blobUrl } }
+    let uploadedPins = {}; // { styleKey: { url, pathname, keywords } }
     // Default 3 style pertama ke-check
     let selectedStyles = new Set(['minimalis', 'bold', 'warm']);
 
@@ -350,6 +354,15 @@
         if (currentBlobs[styleKey]) URL.revokeObjectURL(currentBlobs[styleKey]);
         currentBlobs[styleKey] = URL.createObjectURL(blob);
 
+        // Simpan blob asli + metadata buat upload
+        pinMetadata[styleKey] = {
+          blob,
+          title,
+          category,
+          style: styleKey,
+          styleLabel: (STYLES.find(s => s.key === styleKey) || {}).label || styleKey,
+        };
+
         const img = document.createElement('img');
         img.src = currentBlobs[styleKey];
         img.alt = `${styleKey} preview`;
@@ -411,6 +424,11 @@
 
       const total = stylesToRender.length;
       const successCount = results.filter(r => r.ok).length;
+      // Show tombol upload kalau ada pin
+      if (Object.keys(pinMetadata).length > 0) {
+        $('uploadExportBtn').style.display = 'inline-block';
+      }
+
       if (successCount === total) {
         showStatus(`✅ ${total} style berhasil di-render!`, 'success');
       } else if (successCount === 0) {
@@ -422,6 +440,126 @@
       $('generateBtn').disabled = false;
       updateGenerateBtnLabel();
     });
+
+    // ============ UPLOAD & EXPORT CSV ============
+    async function uploadAllAndExport() {
+      const btn = $('uploadExportBtn');
+      const keys = Object.keys(pinMetadata);
+
+      if (keys.length === 0) {
+        showStatus('⚠️ Belum ada pin. Generate dulu.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '☁️ Uploading...';
+      uploadedPins = {};
+
+      let successCount = 0;
+
+      for (let i = 0; i < keys.length; i++) {
+        const styleKey = keys[i];
+        const meta = pinMetadata[styleKey];
+
+        showStatus(`Uploading <strong>${meta.styleLabel}</strong> (${i + 1}/${keys.length})...`, 'info');
+
+        try {
+          // Convert blob ke base64
+          const reader = new FileReader();
+          const base64Promise = new Promise((resolve) => {
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.readAsDataURL(meta.blob);
+          });
+          const base64 = await base64Promise;
+
+          // Upload via endpoint
+          const res = await fetch('/api/generate-pin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: meta.title,
+              category: meta.category,
+              imageUrl: 'data:image/png;base64,' + base64,
+              style: styleKey,
+              upload: true,
+              pngBase64: base64,
+            }),
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || `HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          uploadedPins[styleKey] = {
+            url: data.url,
+            pathname: data.pathname,
+            style: styleKey,
+            title: meta.title,
+            category: meta.category,
+            keywords: data.keywords || [],
+          };
+          successCount++;
+        } catch (e) {
+          console.error(`[upload ${styleKey}]`, e);
+        }
+      }
+
+      if (successCount === 0) {
+        showStatus('❌ Semua upload gagal. Cek Console.', 'error');
+        btn.disabled = false;
+        btn.textContent = '☁️ Upload & Export CSV';
+        return;
+      }
+
+      // ============ EXPORT CSV ============
+      showStatus(`✅ ${successCount} pin ke-upload. Generate CSV...`, 'info');
+      btn.textContent = '📊 Downloading CSV...';
+
+      const pins = Object.values(uploadedPins).map(p => ({
+        title: p.title,
+        imageUrl: p.url,
+        category: p.category,
+        style: p.style,
+        link: 'https://alfeto.vercel.app/blog/' + (p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+        keywords: p.keywords,
+      }));
+
+      try {
+        const res = await fetch('/api/export-csv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pins,
+            schedule: true,
+            pinsPerDay: 3,
+          }),
+        });
+
+        if (!res.ok) throw new Error('Export CSV gagal');
+
+        const csvBlob = await res.blob();
+        const url = URL.createObjectURL(csvBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'alfeto-pins-' + Date.now() + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        showStatus(`🎉 Berhasil! ${successCount} pin ke-upload + CSV ke-download.`, 'success');
+      } catch (e) {
+        showStatus(`⚠️ Upload OK, tapi CSV gagal: ${e.message}`, 'error');
+      }
+
+      btn.disabled = false;
+      btn.textContent = '☁️ Upload & Export CSV';
+    }
+
+    // Event: Upload & Export
+    document.getElementById('uploadExportBtn')?.addEventListener('click', uploadAllAndExport);
 
     // Init
     renderPreviewCards();
