@@ -179,3 +179,59 @@ Commit: ~10
 Fitur: 12 fitur besar
 
 Waktu: ~6 jam Laporan dibuat: 8 Oktober 2026, setelah commit 93b0814.
+
+## Update: Fase 3 — Jadwal + Pengaturan + Board Mapping (SELESAI)
+
+### Fitur Baru
+
+**Tab Jadwal:**
+- Kalender 7 hari dengan pin count
+- List semua pin terjadwal (judul, style, board, tanggal)
+- Hari ini di-highlight
+
+**Tab Pengaturan:**
+- Pin per artikel (dropdown 1-7)
+- Jam posting (multi-select pill)
+- Auto-offset (toggle)
+- Style default (multi-select pill)
+- Timezone (WIB/WITA/WIT)
+- Save + Reset
+
+**Board Mapping:**
+- CRUD board dari UI (tanpa edit kode)
+- Setiap board: nama + weight + keywords
+- Bulk PUT (anti race condition)
+- Reset ke default
+
+### API Baru
+
+- `api/pinterest-schedule.js` — GET/PUT config jadwal
+- `api/pinterest-boards.js` — GET/PUT/POST/DELETE board
+
+### Store Update
+
+- `pinterest-store.js` — tambah `boards` field + `updateBoards()`, `resetBoards()`, `getBoardsData()`
+- `board-mapper.js` — baca board dari store (bukan hardcode) + cache 60 detik
+- `batch-generator.js` — `await assignBoard()` (async)
+
+### Bug yang Difix
+
+1. **Race condition board save** — loop PUT per board vs bulk PUT → **fix: bulk PUT**
+2. **`assignBoard` async** — nggak ada `await` → board jadi `[object Promise]` → **fix: await**
+3. **Cache board 60 detik** — biar nggak baca Blob tiap panggilan
+
+### File Update
+
+**Baru:**
+- api/pinterest-schedule.js
+- api/pinterest-boards.js
+
+**Diubah:**
+- lib/pinterest-store.js
+- lib/board-mapper.js
+- lib/batch-generator.js
+- public/admin/pinterest-dashboard.html
+
+---
+
+Update laporan: 8 Oktober 2026, setelah commit 4089840.
