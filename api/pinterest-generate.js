@@ -50,8 +50,17 @@ export default async function handler(request, response) {
     });
   }
 
+  // ============ STREAMING MODE ============
+  response.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-cache, no-transform');
+  response.setHeader('Connection', 'keep-alive');
+  response.setHeader('X-Accel-Buffering', 'no');
+
+  const send = (data) => {
+    response.write('data: ' + JSON.stringify(data) + '\n\n');
+  };
+
   try {
-    // Ambil config default kalau styles nggak dikasih
     const data = await readPinterestData();
     const styles = Array.isArray(body.styles) && body.styles.length > 0
       ? body.styles
@@ -63,21 +72,54 @@ export default async function handler(request, response) {
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'https://alfeto.vercel.app';
 
-    const result = await batchGenerate(body.slugs, styles, { baseUrl });
+    // Kirim info awal
+    send({
+      type: 'start',
+      totalArticles: body.slugs.length,
+      totalPinsExpected: body.slugs.length * styles.length,
+      styles,
+    });
+
+    let articleIndex = 0;
+    let totalPinsSoFar = 0;
+
+    const result = await batchGenerate(body.slugs, styles, {
+      baseUrl,
+      onProgress: (progress) => {
+        articleIndex++;
+        totalPinsSoFar += progress.pinsGenerated;
+
+        send({
+          type: 'progress',
+          articleIndex,
+          totalArticles: body.slugs.length,
+          articleTitle: progress.articleTitle,
+          articleSlug: progress.articleSlug,
+          pinsGenerated: progress.pinsGenerated,
+          pinsFailed: progress.pinsFailed,
+          totalPinsSoFar,
+        });
+      },
+    });
 
     console.info(`[pinterest-generate] Selesai: ${result.totalPins} pin`);
 
-    return response.status(200).json({
+    send({
+      type: 'done',
       success: true,
       totalPins: result.totalPins,
       startDate: result.startDate,
       results: result.results,
       pins: result.pins,
     });
+
+    response.end();
   } catch (error) {
     console.error('[pinterest-generate] Error:', error);
-    return response.status(500).json({
+    send({
+      type: 'error',
       error: error instanceof Error ? error.message : 'Gagal batch generate',
     });
+    response.end();
   }
 }

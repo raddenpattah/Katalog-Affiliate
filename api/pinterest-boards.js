@@ -77,20 +77,6 @@ export default async function handler(request, response) {
       return response.status(200).json({ success: true, boards: defaultBoards });
     }
 
-    // ============ DELETE — hapus board ============
-    if (request.method === 'DELETE') {
-      const name = request.query?.name || request.body?.name;
-      if (!name) {
-        return response.status(400).json({ error: 'Nama board wajib' });
-      }
-
-      const data = await readPinterestData();
-      const boards = { ...getBoardsData(data) };
-      delete boards[name];
-      await updateBoards(boards);
-      return response.status(200).json({ success: true, boards });
-    }
-
     response.setHeader('Allow', 'GET, PUT, POST, DELETE');
     return response.status(405).json({ error: 'Method not allowed' });
   } catch (e) {
