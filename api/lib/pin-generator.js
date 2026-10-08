@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 import { renderMinimalis } from './pin-templates/minimalis.js';
 import { renderBold } from './pin-templates/bold.js';
 import { renderEditorial } from './pin-templates/editorial.js';
+import { renderWarm } from './pin-templates/warm.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,6 +35,7 @@ const templateRenderers = {
   minimalis: renderMinimalis,
   bold: renderBold,
   editorial: renderEditorial,
+  warm: renderWarm,
 };
 
 export const AVAILABLE_STYLES = Object.keys(templateRenderers);
