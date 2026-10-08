@@ -8,6 +8,9 @@ import { renderMinimalis } from './pin-templates/minimalis.js';
 import { renderBold } from './pin-templates/bold.js';
 import { renderEditorial } from './pin-templates/editorial.js';
 import { renderWarm } from './pin-templates/warm.js';
+import { planLayout } from './ai-planner.js';
+import { composeFromPlan } from './pin-templates/_shared/compose.js';
+import { getPreset } from './pin-templates/_shared/presets.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,14 +22,22 @@ async function loadFonts() {
   if (fontsCache) return fontsCache;
 
   const fontsDir = join(__dirname, 'fonts');
-  const [regular, bold] = await Promise.all([
+  const [interRegular, interBold, jakartaRegular, jakartaSemiBold, jakartaBold, frauncesItalic] = await Promise.all([
     readFile(join(fontsDir, 'Inter-Regular.ttf')),
     readFile(join(fontsDir, 'Inter-Bold.ttf')),
+    readFile(join(fontsDir, 'PlusJakartaSans-Regular.ttf')),
+    readFile(join(fontsDir, 'PlusJakartaSans-SemiBold.ttf')),
+    readFile(join(fontsDir, 'PlusJakartaSans-Bold.ttf')),
+    readFile(join(fontsDir, 'Fraunces-Italic.ttf')),
   ]);
 
   fontsCache = [
-    { name: 'Inter', data: regular, weight: 400, style: 'normal' },
-    { name: 'Inter', data: bold, weight: 700, style: 'normal' },
+    { name: 'Inter', data: interRegular, weight: 400, style: 'normal' },
+    { name: 'Inter', data: interBold, weight: 700, style: 'normal' },
+    { name: 'Plus Jakarta Sans', data: jakartaRegular, weight: 400, style: 'normal' },
+    { name: 'Plus Jakarta Sans', data: jakartaSemiBold, weight: 600, style: 'normal' },
+    { name: 'Plus Jakarta Sans', data: jakartaBold, weight: 700, style: 'normal' },
+    { name: 'Fraunces', data: frauncesItalic, weight: 700, style: 'italic' },
   ];
   return fontsCache;
 }
@@ -95,7 +106,22 @@ export async function generatePin({
     console.warn(`[pin-generator] Gagal fetch gambar "${imageUrl}": ${error.message}`);
   }
 
-  const jsx = renderer({ title, imageDataUrl, category });
+  // AI Planner: minta layout dari AI (Groq -> Gemini -> null)
+  let plan = null;
+  try {
+    plan = await planLayout({ title, category, style });
+  } catch (err) {
+    console.warn('[pin-generator] AI Planner error: ' + err.message);
+  }
+
+  // Fallback ke preset kalau AI gagal
+  if (!plan) {
+    console.log('[pin-generator] Pakai preset untuk style: ' + style);
+    plan = getPreset(style);
+  }
+
+  // Compose JSX dari plan
+  const jsx = composeFromPlan(plan, { title, category, imageDataUrl, style });
 
   // Step 1: Satori → SVG
   const svg = await satori(jsx, {

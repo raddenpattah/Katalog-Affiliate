@@ -1,0 +1,191 @@
+// api/lib/ai-planner.js
+// AI Planner: pakai LLM untuk nentuin layout pin (JSON), bukan generate gambar.
+// Cascade: Groq (Tier 1) -> Gemini (Tier 2) -> null (fallback ke preset).
+
+import OpenAI from 'openai';
+import { PALETTE_NAMES } from './pin-templates/_shared/palettes.js';
+import { SLANGS, getGenderFromCategory, pickSlang } from './pin-templates/_shared/slangs.js';
+
+const PLANNER_SYSTEM_PROMPT = [
+  'Kamu adalah desainer Pinterest pin profesional.',
+  'Tugasmu: kasih REKOMENDASI LAYOUT dalam format JSON, bukan gambar.',
+  '',
+  'Canvas: 1000x1500 px (rasio 2:3).',
+  '',
+  'Gaya yang tersedia:',
+  '- minimalis: cream background, foto rounded shadow, judul bold, CTA bawah',
+  '- bold: color block terracotta + charcoal, judul di footer',
+  '- editorial: magazine style, header brand, judul besar, divider',
+  '- warm: warm minimalis organik, pita cokelat hangat di bawah',
+  '',
+  'Rules:',
+  '- Judul > 60 karakter -> fontSize 52, kalau <= 60 -> fontSize 64',
+  '- Kategori "DEKORASI" / "HOME" -> palet warm (krem, cokelat)',
+  '- Kategori "FASHION" -> palet bold (hitam, terracotta)',
+  '- Kalau foto banyak ruang kosong di atas -> taruh textCard di top',
+  '- Kalau foto banyak ruang kosong di bawah -> taruh textCard di bottom-center',
+  '- Selalu return JSON valid, tanpa markdown, tanpa penjelasan di luar JSON.',
+  '',
+  'Palet gradient yang TERSEDIA (pilih SATU, sesuai konteks judul & kategori):',
+  PALETTE_NAMES.join(', '),
+  '',
+  'Contoh pemilihan palette:',
+  '- Dekorasi/home aesthetic -> warm, terracotta, caramel, sage, rose, cream',
+  '- Fashion bold -> sunset, coral, crimson, mono, charcoal',
+  '- Teknologi/modern -> ocean, navy, teal, slate, midnight',
+  '- Tanaman/organik -> forest, sage, olive, moss, bamboo',
+  '- Mewah/premium -> wine, bronze, midnight, charcoal',
+  '',
+  'Format JSON yang WAJIB kamu return:',
+  '{',
+  '  "layout": "photo-bottom" | "photo-top" | "photo-full",',
+  '  "textCard": {',
+  '    "position": "top" | "bottom" | "center",',
+  '    "width": 820,',
+  '    "padding": 40,',
+  '    "bgColor": "rgba(243,236,226,0.92)",',
+  '    "textColor": "#5a4030",',
+  '    "fontSize": 64,',
+  '    "subtitle": "..."',
+  '  },',
+  '  "image": {',
+  '    "maskFrom": 45,',
+  '    "maskTo": 80',
+  '  },',
+  '  "palette": "warm",',
+  '  "gradient": {',
+  '    "startAt": "55%"',
+  '  },',
+  '  "audience": {',
+  '    "gender": "pria" | "wanita" | "netral",',
+  '    "tone": "santai" | "formal" | "aesthetic"',
+  '  },',
+  '  "ctaCard": {',
+  '    "position": "top" | "bottom" | "center",',
+  '    "narasi": "<CTA naratif dari judul + ajakan, max 60 char>",',
+  '    "action": "<ajakan halus: lanjut baca yuk / yuk simak / intip yuk>"',
+  '  }',
+  '}',
+  '',
+  'Aturan CTA naratif (field "ctaCard.narasi" + "ctaCard.action"):',
+  '- WAJIB baca judul artikel, lalu PARAFRASE (jangan copy-paste mentah)',
+  '- narasi: parafrase judul + sedikit ajakan, max 60 karakter',
+  '- action: ajakan halus di akhir, pilih dari: "lanjut baca yuk", "yuk simak", "intip yuk", "selengkapnya yuk", "baca yuk"',
+  '- Bahasa Indonesia santai, kayak ngobrol sama teman',
+  '- Contoh narasi: "Simak cara pilih rak estetik yang tepat, lanjut baca yuk"',
+  '',
+  'Aturan audience (field "audience"):',
+  '- Analisa judul + kategori untuk tentukan gender audiens',
+  '- Kata kunci wanita: aesthetic, dekorasi, kamar, cozy, bunga, makeup, skincare, dress, hijab',
+  '- Kata kunci pria: gaming, PC, alat, teknik, bor, mesin, otomotif, gadget',
+  '- Kalau ambigu atau umum -> "netral"',
+  '- Kalau judul formal (panduan, cara memilih) -> tone "formal"',
+  '- Kalau judul aesthetic (esthetic, cozy, dreamy) -> tone "aesthetic"',
+  '- Sisanya -> tone "santai"',
+].join('\n');
+
+// ---------- TIER 1: GROQ ----------
+async function callGroq({ title, category, style }) {
+  const client = new OpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: 'https://api.groq.com/openai/v1',
+  });
+
+  const userPrompt = 'Buat layout Pinterest pin dengan data berikut:\nJudul: "' + title + '"\nKategori: "' + category + '"\nStyle: "' + style + '"\n\nReturn JSON valid.';
+
+  const res = await client.chat.completions.create({
+    model: 'openai/gpt-oss-120b',
+    messages: [
+      { role: 'system', content: PLANNER_SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ],
+    response_format: { type: 'json_object' },
+    temperature: 0.3,
+  });
+
+  const parsed = JSON.parse(res.choices[0].message.content);
+  if (!parsed.palette || !PALETTE_NAMES.includes(parsed.palette)) {
+    parsed.palette = 'warm';
+  }
+  return parsed;
+}
+
+// ---------- TIER 2: GEMINI ----------
+async function callGemini({ title, category, style }) {
+  const client = new OpenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+    baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai',
+  });
+
+  const userPrompt = 'Buat layout Pinterest pin dengan data berikut:\nJudul: "' + title + '"\nKategori: "' + category + '"\nStyle: "' + style + '"\n\nReturn JSON valid.';
+
+  const res = await client.chat.completions.create({
+    model: 'gemini-2.5-flash-lite',
+    messages: [
+      { role: 'system', content: PLANNER_SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ],
+    response_format: { type: 'json_object' },
+    temperature: 0.3,
+  });
+
+  const parsed = JSON.parse(res.choices[0].message.content);
+  if (!parsed.palette || !PALETTE_NAMES.includes(parsed.palette)) {
+    parsed.palette = 'warm';
+  }
+  return parsed;
+}
+
+// ---------- ORCHESTRATOR ----------
+export async function planLayout({ title, category, style }) {
+  if (!process.env.GROQ_API_KEY && !process.env.GEMINI_API_KEY) {
+    console.warn('[ai-planner] Tidak ada API key, skip AI');
+    return null;
+  }
+
+  // Inject sapaan ke plan (setelah plan dari AI)
+  function injectSlang(plan) {
+    if (!plan || !plan.ctaCard) return plan;
+
+    // Tentukan gender: prioritas dari AI, fallback ke kategori
+    let gender = plan.audience && plan.audience.gender;
+    if (!gender || gender === 'netral') {
+      gender = getGenderFromCategory(category);
+    }
+
+    // Pilih sapaan deterministik
+    const sapaan = pickSlang({ gender, title });
+
+    // Gabung narasi + action + sapaan
+    const narasi = plan.ctaCard.narasi || '';
+    const action = plan.ctaCard.action || 'baca yuk';
+    plan.ctaCard.fullText = narasi + ', ' + action + ' ' + sapaan;
+
+    return plan;
+  }
+
+  if (process.env.GROQ_API_KEY) {
+    try {
+      console.log('[ai-planner] Tier 1: Groq');
+      const plan = await callGroq({ title, category, style });
+      console.log('[ai-planner] Groq sukses');
+      return injectSlang(plan);
+    } catch (err) {
+      console.warn('[ai-planner] Groq gagal: ' + err.message);
+    }
+  }
+
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      console.log('[ai-planner] Tier 2: Gemini');
+      const plan = await callGemini({ title, category, style });
+      console.log('[ai-planner] Gemini sukses');
+      return injectSlang(plan);
+    } catch (err) {
+      console.warn('[ai-planner] Gemini gagal: ' + err.message);
+    }
+  }
+
+  console.warn('[ai-planner] Semua provider gagal, fallback ke preset');
+  return null;
+}
