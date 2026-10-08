@@ -78,6 +78,110 @@
       border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 24px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      max-width: 640px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-title { font-size: 20px; font-weight: 700; color: #7a5a3e; }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #8a7660;
+      padding: 0 8px;
+    }
+    .modal-subtitle { font-size: 13px; color: #8a7660; margin-bottom: 20px; }
+    .article-checkbox-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e7e5e4;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .article-checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #f5f5f4;
+      cursor: pointer;
+    }
+    .article-checkbox-item:last-child { border-bottom: none; }
+    .article-checkbox-item:hover { background: #fafaf9; }
+    .article-checkbox-item input[type="checkbox"] {
+      margin-top: 3px;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      accent-color: #7a5a3e;
+    }
+    .article-checkbox-item .info { flex: 1; }
+    .article-checkbox-item .title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #292524;
+      margin-bottom: 4px;
+    }
+    .article-checkbox-item .meta {
+      font-size: 12px;
+      color: #8a7660;
+    }
+    .article-checkbox-item.tracked {
+      opacity: 0.6;
+    }
+    .modal-config {
+      background: #fafaf9;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .modal-config-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+    .modal-config-row .label { color: #8a7660; }
+    .modal-config-row .value { font-weight: 600; color: #292524; }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .modal-summary {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -128,6 +232,43 @@
     <div class="tab-content" id="tab-settings">
       <div class="section">
         <div class="section-title">⚙️ Pengaturan (Coming soon)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL GENERATE -->
+  <div class="modal-overlay" id="generateModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">📌 Generate Pin Baru</div>
+        <button class="modal-close" id="modalCloseBtn">×</button>
+      </div>
+      <div class="modal-subtitle">Pilih artikel yang mau di-generate pin-nya. 3 pin per artikel.</div>
+
+      <div class="article-checkbox-list" id="articleCheckboxList">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+
+      <div class="modal-config">
+        <div class="modal-config-row">
+          <span class="label">Pin per artikel</span>
+          <span class="value" id="cfgPinsPerArticle">3</span>
+        </div>
+        <div class="modal-config-row">
+          <span class="label">Jam posting</span>
+          <span class="value" id="cfgPostTimes">06:00, 12:00, 17:00</span>
+        </div>
+        <div class="modal-config-row">
+          <span class="label">Auto-offset</span>
+          <span class="value" id="cfgAutoOffset">✅ ON</span>
+        </div>
+      </div>
+
+      <div class="modal-summary" id="modalSummary" style="display:none;"></div>
+
+      <div class="modal-actions">
+        <button class="btn secondary" id="modalCancelBtn">Batal</button>
+        <button class="btn" id="modalGenerateBtn" disabled>Generate Pin</button>
       </div>
     </div>
   </div>
@@ -250,6 +391,118 @@
       }
     }
 
+    // ============ MODAL GENERATE ============
+    let selectedArticles = new Set();
+
+    function openGenerateModal() {
+      const modal = $('generateModal');
+      modal.classList.add('active');
+      selectedArticles.clear();
+      renderArticleCheckboxes();
+      updateModalSummary();
+    }
+
+    function closeGenerateModal() {
+      $('generateModal').classList.remove('active');
+      selectedArticles.clear();
+    }
+
+    function renderArticleCheckboxes() {
+      const el = $('articleCheckboxList');
+      const articles = (dashboardData && dashboardData.articles) || [];
+
+      if (articles.length === 0) {
+        el.innerHTML = '<div style="padding:20px;text-align:center;color:#8a7660;">Belum ada artikel.</div>';
+        return;
+      }
+
+      el.innerHTML = articles.map(a => `
+        <label class="article-checkbox-item ${a.tracked ? 'tracked' : ''}">
+          <input type="checkbox" data-slug="${a.slug}" ${a.tracked ? 'disabled' : ''}>
+          <div class="info">
+            <div class="title">${a.title}</div>
+            <div class="meta">
+              📁 ${a.category} · 📅 ${a.pubDate}
+              ${a.tracked ? ' · ✅ Sudah di-generate' : ''}
+            </div>
+          </div>
+        </label>
+      `).join('');
+
+      // Attach listener
+      el.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            selectedArticles.add(e.target.dataset.slug);
+          } else {
+            selectedArticles.delete(e.target.dataset.slug);
+          }
+          updateModalSummary();
+        });
+      });
+    }
+
+    function updateModalSummary() {
+      const count = selectedArticles.size;
+      const pinsPerArticle = (dashboardData && dashboardData.config && dashboardData.config.pinsPerArticle) || 3;
+      const totalPins = count * pinsPerArticle;
+
+      const summaryEl = $('modalSummary');
+      const generateBtn = $('modalGenerateBtn');
+
+      if (count === 0) {
+        summaryEl.style.display = 'none';
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Generate Pin';
+      } else {
+        summaryEl.style.display = 'block';
+        summaryEl.textContent = `✨ ${count} artikel × ${pinsPerArticle} style = ${totalPins} pin`;
+        generateBtn.disabled = false;
+        generateBtn.textContent = `✨ Generate ${totalPins} Pin`;
+      }
+    }
+
+    async function handleGenerate() {
+      const count = selectedArticles.size;
+      if (count === 0) return;
+
+      const pinsPerArticle = (dashboardData && dashboardData.config && dashboardData.config.pinsPerArticle) || 3;
+      const totalPins = count * pinsPerArticle;
+
+      const confirmMsg = `Generate ${totalPins} pin dari ${count} artikel?\n\nProses ini butuh ~${Math.ceil(totalPins * 5 / 60)} menit. Lanjutkan?`;
+      if (!confirm(confirmMsg)) return;
+
+      const generateBtn = $('modalGenerateBtn');
+      generateBtn.disabled = true;
+      generateBtn.textContent = '⏳ Generating...';
+
+      try {
+        const res = await fetch('/api/pinterest-generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slugs: Array.from(selectedArticles),
+            styles: (dashboardData.config && dashboardData.config.defaultStyles) || ['minimalis', 'editorial', 'warm'],
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'HTTP ' + res.status);
+        }
+
+        const result = await res.json();
+        showToast(`✅ ${result.pins?.length || 0} pin berhasil di-generate!`, 'success');
+        closeGenerateModal();
+        loadDashboard();
+      } catch (e) {
+        console.error('[dashboard] Generate error:', e);
+        showToast('❌ Gagal generate: ' + e.message, 'error');
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Generate Pin';
+      }
+    }
+
     // ============ INIT ============
     document.addEventListener('DOMContentLoaded', () => {
       console.log('[dashboard] DOM ready');
@@ -259,6 +512,24 @@
       $('refreshBtn').addEventListener('click', () => {
         loadDashboard();
         showToast('Data di-refresh');
+      });
+
+      // Modal events
+      $('generateBtn').addEventListener('click', openGenerateModal);
+      $('modalCloseBtn').addEventListener('click', closeGenerateModal);
+      $('modalCancelBtn').addEventListener('click', closeGenerateModal);
+      $('modalGenerateBtn').addEventListener('click', handleGenerate);
+
+      // Close modal kalau klik overlay
+      $('generateModal').addEventListener('click', (e) => {
+        if (e.target.id === 'generateModal') closeGenerateModal();
+      });
+
+      // ESC key buat close
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && $('generateModal').classList.contains('active')) {
+          closeGenerateModal();
+        }
       });
     });
   </script>
