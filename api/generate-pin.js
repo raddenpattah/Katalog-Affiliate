@@ -1,4 +1,5 @@
 import { generatePin, AVAILABLE_STYLES } from '../lib/pin-generator.js';
+import { uploadPin, isBlobConfigured } from '../lib/blob-uploader.js';
 
 export const maxDuration = 30;
 
@@ -32,6 +33,7 @@ export default async function handler(request, response) {
   const imageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : '';
   const category = typeof body.category === 'string' ? body.category.trim() : 'Artikel';
   const style = typeof body.style === 'string' ? body.style.trim().toLowerCase() : 'minimalis';
+  const shouldUpload = body.upload === true;
 
   if (!title || !imageUrl) {
     return response.status(400).json({ error: 'Title dan imageUrl wajib diisi' });
@@ -59,6 +61,30 @@ export default async function handler(request, response) {
       baseUrl,
     });
 
+    // Kalau upload=true, upload ke Blob & return JSON
+    if (shouldUpload) {
+      if (!isBlobConfigured()) {
+        return response.status(500).json({
+          error: 'Blob belum dikonfigurasi (BLOB_PIN_READ_WRITE_TOKEN / BLOB_AI_CONFIG_READ_WRITE_TOKEN)',
+        });
+      }
+
+      const filename = title.slice(0, 50) + '-' + style;
+      const { url, pathname } = await uploadPin(pngBuffer, filename);
+
+      console.info(`[generate-pin] Upload sukses: ${url}`);
+
+      return response.status(200).json({
+        url,
+        pathname,
+        style,
+        title,
+        category,
+        uploadedAt: new Date().toISOString(),
+      });
+    }
+
+    // Default: return PNG binary
     response.setHeader('Content-Type', 'image/png');
     response.setHeader('Cache-Control', 'public, max-age=3600');
     response.setHeader('X-Pin-Style', style);
