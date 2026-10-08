@@ -78,6 +78,73 @@
       border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* Calendar */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .calendar-day {
+      background: #fafaf9;
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 100px;
+      border: 1px solid #e7e5e4;
+    }
+    .calendar-day.empty {
+      background: transparent;
+      border: 1px dashed #e7e5e4;
+    }
+    .calendar-day.today {
+      background: #fef3c7;
+      border-color: #d97706;
+    }
+    .calendar-day .day-name {
+      font-size: 11px;
+      color: #8a7660;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .calendar-day .day-date {
+      font-size: 18px;
+      font-weight: 700;
+      color: #292524;
+      margin-bottom: 8px;
+    }
+    .calendar-day .day-pins {
+      font-size: 11px;
+      color: #7a5a3e;
+      font-weight: 600;
+    }
+    .calendar-day .day-count {
+      display: inline-block;
+      background: #7a5a3e;
+      color: white;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 6px;
+    }
+    .pin-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #f5f5f4;
+    }
+    .pin-list-item:last-child { border-bottom: none; }
+    .pin-info { flex: 1; }
+    .pin-title { font-size: 14px; font-weight: 600; color: #292524; }
+    .pin-meta {
+      font-size: 12px;
+      color: #8a7660;
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
     /* Modal */
     .modal-overlay {
       position: fixed;
@@ -225,7 +292,16 @@
 
     <div class="tab-content" id="tab-jadwal">
       <div class="section">
-        <div class="section-title">📅 Jadwal (Coming soon)</div>
+        <div class="section-header">
+          <div class="section-title">📅 Jadwal 7 Hari ke Depan</div>
+        </div>
+        <div id="scheduleGrid" class="loading">Memuat...</div>
+      </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📋 Semua Pin Terjadwal</div>
+        </div>
+        <div id="scheduleList" class="loading">Memuat...</div>
       </div>
     </div>
 
@@ -383,6 +459,7 @@
         renderStats(dashboardData);
         renderSchedulePreview(dashboardData);
         renderArticles(dashboardData);
+        renderSchedule(dashboardData);
         console.log('[dashboard] Loaded:', dashboardData.stats);
       } catch (e) {
         console.error('[dashboard] Error:', e);
@@ -500,6 +577,76 @@
         showToast('❌ Gagal generate: ' + e.message, 'error');
         generateBtn.disabled = false;
         generateBtn.textContent = 'Generate Pin';
+      }
+    }
+
+    // ============ JADWAL ============
+    function renderSchedule(data) {
+      const pins = data.pins || [];
+
+      // Calendar 7 hari
+      const grid = $('scheduleGrid');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const days = [];
+      const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() + i);
+        const dateKey = d.toISOString().split('T')[0];
+
+        // Filter pins yang scheduled hari ini
+        const dayPins = pins.filter(p => {
+          if (!p.scheduledFor) return false;
+          return p.scheduledFor.startsWith(dateKey);
+        });
+
+        days.push({
+          date: d,
+          dayName: dayNames[d.getDay()],
+          dayNum: d.getDate(),
+          isToday: i === 0,
+          pins: dayPins,
+        });
+      }
+
+      grid.innerHTML = '<div class="calendar-grid">' + days.map(d => `
+        <div class="calendar-day ${d.isToday ? 'today' : ''}">
+          <div class="day-name">${d.dayName}</div>
+          <div class="day-date">${d.dayNum}</div>
+          ${d.pins.length > 0 
+            ? '<div class="day-pins">' + d.pins.map(p => '● ' + (p.style || '')).join('<br>') + '</div><div class="day-count">' + d.pins.length + ' pin</div>'
+            : '<div class="day-pins" style="color:#a8977e;">—</div>'}
+        </div>
+      `).join('') + '</div>';
+
+      // List semua pin terjadwal
+      if (pins.length === 0) {
+        $('scheduleList').innerHTML = '<div style="text-align:center;padding:20px;color:#8a7660;">Belum ada pin terjadwal. Generate artikel dulu.</div>';
+      } else {
+        $('scheduleList').innerHTML = pins.map(p => {
+          const date = new Date(p.scheduledFor);
+          const dateStr = date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+          const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+          
+          return `
+            <div class="pin-list-item">
+              <div class="pin-info">
+                <div class="pin-title">${p.title || p.articleTitle || 'Tanpa judul'}</div>
+                <div class="pin-meta">
+                  <span>🎨 ${p.style || '-'}</span>
+                  <span>📁 ${p.board || '-'}</span>
+                  <span>📅 ${dateStr} ${timeStr}</span>
+                </div>
+              </div>
+              <div>
+                <span class="badge tracked">⏳ Scheduled</span>
+              </div>
+            </div>
+          `;
+        }).join('');
       }
     }
 

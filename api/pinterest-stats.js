@@ -73,6 +73,23 @@ export default async function handler(request, response) {
     // Config
     const config = data.config;
 
+    // Kumpulkan semua pin scheduled (untuk kalender)
+    const allPins = [];
+    for (const slug of trackedSlugs) {
+      const art = trackedArticles[slug];
+      const pins = art.pins || [];
+      for (const pin of pins) {
+        if (pin.scheduledFor) {
+          allPins.push({
+            ...pin,
+            slug,
+            articleTitle: art.title,
+          });
+        }
+      }
+    }
+    allPins.sort((a, b) => (a.scheduledFor || '').localeCompare(b.scheduledFor || ''));
+
     return response.status(200).json({
       stats: {
         totalPins,
@@ -95,6 +112,7 @@ export default async function handler(request, response) {
         tracked: trackedSlugs.includes(a.slug),
         pinCount: trackedArticles[a.slug]?.pins?.length || 0,
       })),
+      pins: allPins,
     });
   } catch (error) {
     console.error('[pinterest-stats] Error:', error);
