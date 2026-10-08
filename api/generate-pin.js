@@ -1,4 +1,4 @@
-import { generatePin, AVAILABLE_STYLES } from './lib/pin-generator.js';
+import { generatePin, AVAILABLE_STYLES } from '../lib/pin-generator.js';
 
 export const maxDuration = 30;
 

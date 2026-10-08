@@ -1,6 +1,6 @@
 export const maxDuration = 60;
 
-import { generateArticle } from './lib/ai-provider.js';
+import { generateArticle } from '../lib/ai-provider.js';
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_CATEGORY_LENGTH = 100;

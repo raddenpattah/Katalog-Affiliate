@@ -5,6 +5,9 @@
   "functions": {
     "api/generate-blog.js": {
       "maxDuration": 60
+    },
+    "api/generate-pin.js": {
+      "maxDuration": 60
     }
   }
 }
