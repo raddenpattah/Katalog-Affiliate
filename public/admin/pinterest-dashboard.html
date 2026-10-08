@@ -78,6 +78,76 @@
       border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* Form */
+    .form-row {
+      margin-bottom: 20px;
+    }
+    .form-row label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #292524;
+      margin-bottom: 6px;
+    }
+    .form-row select,
+    .form-row input[type="text"],
+    .form-row input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e7e5e4;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+    }
+    .form-row .hint {
+      font-size: 12px;
+      color: #a8977e;
+      margin-top: 4px;
+    }
+    .form-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #7a5a3e;
+      cursor: pointer;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .time-inputs, .style-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .time-input, .style-checkbox {
+      padding: 8px 14px;
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .time-input.active, .style-checkbox.active {
+      background: #7a5a3e;
+      color: white;
+      border-color: #7a5a3e;
+    }
+    .style-checkbox input {
+      margin: 0;
+      accent-color: white;
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #e7e5e4;
+    }
     /* Calendar */
     .calendar-grid {
       display: grid;
@@ -307,7 +377,56 @@
 
     <div class="tab-content" id="tab-settings">
       <div class="section">
-        <div class="section-title">⚙️ Pengaturan (Coming soon)</div>
+        <div class="section-header">
+          <div class="section-title">⚙️ Pengaturan Jadwal</div>
+        </div>
+        <div id="settingsForm">
+          <div class="form-row">
+            <label>Pin per artikel</label>
+            <select id="cfgPinsPerArticleSelect">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+              <option value="7">7</option>
+            </select>
+            <div class="hint">Jumlah pin yang di-generate per artikel</div>
+          </div>
+
+          <div class="form-row">
+            <label>Jam posting (WIB)</label>
+            <div id="cfgPostTimesInputs" class="time-inputs"></div>
+            <div class="hint">Pin akan dijadwalkan di jam-jam ini</div>
+          </div>
+
+          <div class="form-row">
+            <label>
+              <input type="checkbox" id="cfgAutoOffset">
+              Auto-offset
+            </label>
+            <div class="hint">Otomatis lanjut dari jadwal terakhir (biar nggak tabrakan)</div>
+          </div>
+
+          <div class="form-row">
+            <label>Style default</label>
+            <div id="cfgStylesCheckboxes" class="style-checkboxes"></div>
+            <div class="hint">Style yang dipakai saat batch generate</div>
+          </div>
+
+          <div class="form-row">
+            <label>Timezone</label>
+            <select id="cfgTimezone">
+              <option value="WIB">WIB (UTC+7)</option>
+              <option value="WITA">WITA (UTC+8)</option>
+              <option value="WIT">WIT (UTC+9)</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn secondary" id="resetConfigBtn">Reset ke Default</button>
+            <button class="btn" id="saveConfigBtn">💾 Simpan Pengaturan</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -460,6 +579,7 @@
         renderSchedulePreview(dashboardData);
         renderArticles(dashboardData);
         renderSchedule(dashboardData);
+        renderSettingsForm(dashboardData.config);
         console.log('[dashboard] Loaded:', dashboardData.stats);
       } catch (e) {
         console.error('[dashboard] Error:', e);
@@ -650,6 +770,147 @@
       }
     }
 
+    // ============ PENGATURAN ============
+    const ALL_STYLES = ['minimalis', 'bold', 'editorial', 'warm', 'pastel', 'boho', 'poster'];
+    const ALL_TIMES = ['06:00', '09:00', '12:00', '15:00', '17:00', '20:00', '21:00'];
+
+    function renderSettingsForm(config) {
+      // Pins per artikel
+      $('cfgPinsPerArticleSelect').value = config.pinsPerArticle || 3;
+
+      // Auto-offset
+      $('cfgAutoOffset').checked = config.autoOffset !== false;
+
+      // Timezone
+      $('cfgTimezone').value = config.timezone || 'WIB';
+
+      // Post times
+      const activeTimes = config.postTimes || ['06:00', '12:00', '17:00'];
+      const timesContainer = $('cfgPostTimesInputs');
+      timesContainer.innerHTML = ALL_TIMES.map(t => `
+        <div class="time-input ${activeTimes.includes(t) ? 'active' : ''}" data-time="${t}">
+          <input type="checkbox" ${activeTimes.includes(t) ? 'checked' : ''} style="display:none;">
+          🕐 ${t}
+        </div>
+      `).join('');
+
+      timesContainer.querySelectorAll('.time-input').forEach(el => {
+        el.addEventListener('click', () => {
+          el.classList.toggle('active');
+          const cb = el.querySelector('input');
+          cb.checked = el.classList.contains('active');
+        });
+      });
+
+      // Styles
+      const activeStyles = config.defaultStyles || ['minimalis', 'editorial', 'warm'];
+      const stylesContainer = $('cfgStylesCheckboxes');
+      stylesContainer.innerHTML = ALL_STYLES.map(s => `
+        <div class="style-checkbox ${activeStyles.includes(s) ? 'active' : ''}" data-style="${s}">
+          <input type="checkbox" ${activeStyles.includes(s) ? 'checked' : ''} style="display:none;">
+          🎨 ${s}
+        </div>
+      `).join('');
+
+      stylesContainer.querySelectorAll('.style-checkbox').forEach(el => {
+        el.addEventListener('click', () => {
+          el.classList.toggle('active');
+          const cb = el.querySelector('input');
+          cb.checked = el.classList.contains('active');
+        });
+      });
+    }
+
+    async function saveConfig() {
+      const btn = $('saveConfigBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+
+      // Kumpulkan data
+      const pinsPerArticle = parseInt($('cfgPinsPerArticleSelect').value);
+      const autoOffset = $('cfgAutoOffset').checked;
+      const timezone = $('cfgTimezone').value;
+
+      const postTimes = [];
+      document.querySelectorAll('#cfgPostTimesInputs .time-input.active').forEach(el => {
+        postTimes.push(el.dataset.time);
+      });
+
+      const defaultStyles = [];
+      document.querySelectorAll('#cfgStylesCheckboxes .style-checkbox.active').forEach(el => {
+        defaultStyles.push(el.dataset.style);
+      });
+
+      if (postTimes.length === 0) {
+        showToast('❌ Pilih minimal 1 jam posting', 'error');
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Pengaturan';
+        return;
+      }
+
+      if (defaultStyles.length === 0) {
+        showToast('❌ Pilih minimal 1 style', 'error');
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Pengaturan';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/pinterest-schedule', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pinsPerArticle,
+            autoOffset,
+            timezone,
+            postTimes,
+            defaultStyles,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'HTTP ' + res.status);
+        }
+
+        const result = await res.json();
+        showToast('✅ Pengaturan tersimpan!', 'success');
+        dashboardData.config = result.config;
+      } catch (e) {
+        console.error('[settings] Save error:', e);
+        showToast('❌ Gagal simpan: ' + e.message, 'error');
+      }
+
+      btn.disabled = false;
+      btn.textContent = '💾 Simpan Pengaturan';
+    }
+
+    async function resetConfig() {
+      if (!confirm('Reset pengaturan ke default?')) return;
+
+      try {
+        const res = await fetch('/api/pinterest-schedule', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pinsPerArticle: 3,
+            autoOffset: true,
+            timezone: 'WIB',
+            postTimes: ['06:00', '12:00', '17:00'],
+            defaultStyles: ['minimalis', 'editorial', 'warm'],
+          }),
+        });
+
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        const result = await res.json();
+        renderSettingsForm(result.config);
+        showToast('✅ Pengaturan di-reset ke default', 'success');
+      } catch (e) {
+        showToast('❌ Gagal reset: ' + e.message, 'error');
+      }
+    }
+
     // ============ INIT ============
     document.addEventListener('DOMContentLoaded', () => {
       console.log('[dashboard] DOM ready');
@@ -660,6 +921,10 @@
         loadDashboard();
         showToast('Data di-refresh');
       });
+
+      // Settings events
+      $('saveConfigBtn').addEventListener('click', saveConfig);
+      $('resetConfigBtn').addEventListener('click', resetConfig);
 
       // Modal events
       $('generateBtn').addEventListener('click', openGenerateModal);
