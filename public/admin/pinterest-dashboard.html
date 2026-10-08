@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinterest Dashboard — Alfeto</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f4;
+      color: #292524;
+      line-height: 1.5;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    h1 { font-size: 28px; font-weight: 700; color: #7a5a3e; }
+    .subtitle { font-size: 14px; color: #8a7660; margin-top: 4px; }
+    .btn {
+      padding: 10px 18px; background: #7a5a3e; color: white; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .btn.secondary { background: white; color: #7a5a3e; border: 1px solid #e7e5e4; }
+    .tabs {
+      display: flex; gap: 4px; background: white; padding: 4px;
+      border-radius: 10px; margin-bottom: 24px; border: 1px solid #e7e5e4;
+    }
+    .tab {
+      flex: 1; padding: 12px; text-align: center; border-radius: 6px;
+      cursor: pointer; font-weight: 600; font-size: 14px; color: #8a7660;
+    }
+    .tab.active { background: #7a5a3e; color: white; }
+    .tab:hover:not(.active) { background: #f5f5f4; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white; padding: 20px; border-radius: 12px; border: 1px solid #e7e5e4;
+    }
+    .stat-card .icon { font-size: 24px; margin-bottom: 8px; }
+    .stat-card .label { font-size: 13px; color: #8a7660; font-weight: 500; margin-bottom: 4px; }
+    .stat-card .value { font-size: 32px; font-weight: 700; color: #292524; }
+    .stat-card .hint { font-size: 12px; color: #a8977e; margin-top: 6px; }
+    .section {
+      background: white; padding: 24px; border-radius: 12px;
+      border: 1px solid #e7e5e4; margin-bottom: 24px;
+    }
+    .section-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+    }
+    .section-title { font-size: 18px; font-weight: 700; }
+    .article-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px; border-bottom: 1px solid #f5f5f4;
+    }
+    .article-item:last-child { border-bottom: none; }
+    .article-info { flex: 1; }
+    .article-title { font-size: 15px; font-weight: 600; color: #292524; margin-bottom: 4px; }
+    .article-meta { font-size: 12px; color: #8a7660; display: flex; gap: 12px; flex-wrap: wrap; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .badge.tracked { background: #d1fae5; color: #065f46; }
+    .badge.untracked { background: #fef3c7; color: #92400e; }
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; padding: 14px 20px;
+      border-radius: 8px; font-weight: 600; font-size: 14px; opacity: 0;
+      transition: opacity 0.3s; z-index: 1000;
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { background: #059669; color: white; }
+    .toast.error { background: #dc2626; color: white; }
+    .loading { text-align: center; padding: 40px; color: #8a7660; }
+    .spinner {
+      display: inline-block; width: 32px; height: 32px;
+      border: 3px solid #e7e5e4; border-top-color: #7a5a3e;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>🎨 Pinterest Dashboard</h1>
+        <div class="subtitle">Kelola jadwal & tracking pin Pinterest kamu</div>
+      </div>
+      <button class="btn secondary" id="refreshBtn">🔄 Refresh</button>
+    </header>
+
+    <div class="tabs" id="tabsNav">
+      <div class="tab active" data-tab="overview">📊 Overview</div>
+      <div class="tab" data-tab="artikel">📚 Artikel</div>
+      <div class="tab" data-tab="jadwal">📅 Jadwal</div>
+      <div class="tab" data-tab="settings">⚙️ Pengaturan</div>
+    </div>
+
+    <div class="tab-content active" id="tab-overview">
+      <div class="stats-grid" id="statsGrid">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📅 Jadwal 7 Hari ke Depan</div>
+        </div>
+        <div id="schedulePreview" class="loading">Memuat...</div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-artikel">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📚 Tracking Artikel</div>
+          <button class="btn" id="generateBtn">+ Generate Baru</button>
+        </div>
+        <div id="articlesList" class="loading">Memuat...</div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-jadwal">
+      <div class="section">
+        <div class="section-title">📅 Jadwal (Coming soon)</div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-settings">
+      <div class="section">
+        <div class="section-title">⚙️ Pengaturan (Coming soon)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============ HELPERS ============
+    const $ = (id) => document.getElementById(id);
+    let dashboardData = null;
+
+    function showToast(msg, type = 'success') {
+      const toast = $('toast');
+      toast.textContent = msg;
+      toast.className = 'toast show ' + type;
+      setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+
+    // ============ TAB SWITCHING ============
+    function switchTab(tabName) {
+      // Update tab buttons
+      const allTabs = document.querySelectorAll('#tabsNav .tab');
+      allTabs.forEach(t => {
+        if (t.getAttribute('data-tab') === tabName) {
+          t.classList.add('active');
+        } else {
+          t.classList.remove('active');
+        }
+      });
+
+      // Update tab contents
+      const allContents = document.querySelectorAll('.tab-content');
+      allContents.forEach(c => {
+        c.classList.remove('active');
+      });
+
+      const target = $('tab-' + tabName);
+      if (target) {
+        target.classList.add('active');
+        console.log('[dashboard] Switched to tab:', tabName);
+      } else {
+        console.warn('[dashboard] Tab not found:', tabName);
+      }
+    }
+
+    // Attach click handler ke tiap tab (langsung, simple)
+    function initTabs() {
+      const tabs = document.querySelectorAll('#tabsNav .tab');
+      console.log('[dashboard] Init tabs:', tabs.length);
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.getAttribute('data-tab');
+          console.log('[dashboard] Tab clicked:', tabName);
+          switchTab(tabName);
+        });
+      });
+    }
+
+    // ============ DATA FETCH ============
+    async function fetchStats() {
+      const res = await fetch('/api/pinterest-stats');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    }
+
+    function renderStats(data) {
+      const s = data.stats;
+      $('statsGrid').innerHTML = `
+        <div class="stat-card"><div class="icon">📌</div><div class="label">Total Pin</div><div class="value">${s.totalPins}</div><div class="hint">dari ${s.trackedArticles} artikel</div></div>
+        <div class="stat-card"><div class="icon">🆕</div><div class="label">Hari Ini</div><div class="value">${s.todayPins}</div><div class="hint">pin dijadwalkan</div></div>
+        <div class="stat-card"><div class="icon">⏳</div><div class="label">Scheduled</div><div class="value">${s.scheduledPins}</div><div class="hint">menunggu publish</div></div>
+        <div class="stat-card"><div class="icon">✅</div><div class="label">Published</div><div class="value">${s.publishedPins}</div><div class="hint">live di Pinterest</div></div>
+        <div class="stat-card"><div class="icon">📚</div><div class="label">Artikel</div><div class="value">${s.totalArticles}</div><div class="hint">${s.untrackedArticles} belum di-generate</div></div>
+      `;
+    }
+
+    function renderSchedulePreview(data) {
+      if (data.stats.totalPins === 0) {
+        $('schedulePreview').innerHTML = '<div style="text-align:center;padding:20px;color:#8a7660;">Belum ada pin dijadwalkan. Generate artikel dulu di tab 📚 Artikel.</div>';
+      } else {
+        $('schedulePreview').innerHTML = '<div style="color:#8a7660;">Jadwal akan muncul setelah ada pin di-generate.</div>';
+      }
+    }
+
+    function renderArticles(data) {
+      const el = $('articlesList');
+      if (!data.articles || data.articles.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:#8a7660;">Belum ada artikel.</div>';
+        return;
+      }
+      el.innerHTML = data.articles.map(a => `
+        <div class="article-item">
+          <div class="article-info">
+            <div class="article-title">${a.title}</div>
+            <div class="article-meta">
+              <span>📁 ${a.category}</span>
+              <span>📅 ${a.pubDate}</span>
+              <span>📌 ${a.pinCount}/3 pin</span>
+            </div>
+          </div>
+          <div>
+            ${a.tracked ? '<span class="badge tracked">✅ Tracked</span>' : '<span class="badge untracked">⏳ Belum</span>'}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadDashboard() {
+      try {
+        $('statsGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+        dashboardData = await fetchStats();
+        renderStats(dashboardData);
+        renderSchedulePreview(dashboardData);
+        renderArticles(dashboardData);
+        console.log('[dashboard] Loaded:', dashboardData.stats);
+      } catch (e) {
+        console.error('[dashboard] Error:', e);
+        $('statsGrid').innerHTML = '<div class="loading" style="color:#dc2626;">❌ Gagal memuat. Cek Console.</div>';
+        showToast('Gagal memuat data', 'error');
+      }
+    }
+
+    // ============ INIT ============
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('[dashboard] DOM ready');
+      initTabs();
+      loadDashboard();
+
+      $('refreshBtn').addEventListener('click', () => {
+        loadDashboard();
+        showToast('Data di-refresh');
+      });
+    });
+  </script>
+</body>
+</html>
