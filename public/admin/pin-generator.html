@@ -180,7 +180,17 @@
       </div>
 
       <div>
-        <button id="generateBtn">✨ Generate Semua Style</button>
+        <div id="styleSelector" style="margin: 16px 0; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 14px; color: #374151;">Pilih Style:</strong>
+            <div>
+              <button type="button" id="selectAllBtn" style="font-size: 12px; padding: 4px 10px; margin-right: 6px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">Pilih Semua</button>
+              <button type="button" id="clearAllBtn" style="font-size: 12px; padding: 4px 10px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">Kosongkan</button>
+            </div>
+          </div>
+          <div id="styleCheckboxes" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        </div>
+        <button id="generateBtn">✨ Generate Style Terpilih</button>
         <button id="clearBtn" class="secondary">Reset</button>
       </div>
     </div>
@@ -203,6 +213,41 @@
     ];
 
     let currentBlobs = {};
+    // Default 3 style pertama ke-check
+    let selectedStyles = new Set(['minimalis', 'bold', 'warm']);
+
+    function renderStyleCheckboxes() {
+      const container = document.getElementById('styleCheckboxes');
+      if (!container) return;
+      container.innerHTML = '';
+      STYLES.forEach(style => {
+        const isChecked = selectedStyles.has(style.key);
+        const label = document.createElement('label');
+        label.style.cssText = 'display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 13px; user-select: none;';
+        label.innerHTML = '<input type="checkbox" data-style="' + style.key + '" ' + (isChecked ? 'checked' : '') + ' style="cursor: pointer;">' + style.label;
+        const checkbox = label.querySelector('input');
+        checkbox.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            selectedStyles.add(style.key);
+          } else {
+            selectedStyles.delete(style.key);
+          }
+          updateGenerateBtnLabel();
+        });
+        container.appendChild(label);
+      });
+      updateGenerateBtnLabel();
+    }
+
+    function updateGenerateBtnLabel() {
+      const btn = document.getElementById('generateBtn');
+      if (!btn) return;
+      const count = selectedStyles.size;
+      btn.textContent = count > 0
+        ? '✨ Generate ' + count + ' Style'
+        : '✨ Pilih minimal 1 style';
+      btn.disabled = count === 0;
+    }
 
     function showStatus(msg, type = 'info') {
       const el = $('status');
@@ -326,6 +371,11 @@
     }
 
     $('generateBtn').addEventListener('click', async () => {
+      if (selectedStyles.size === 0) {
+        showStatus('⚠️ Pilih minimal 1 style dulu.', 'error');
+        return;
+      }
+
       const title = $('title').value.trim();
       const imageUrl = $('imageUrl').value.trim();
       const category = $('category').value.trim() || 'Artikel';
@@ -342,36 +392,53 @@
       renderPreviewCards();
 
       const results = [];
-      for (let i = 0; i < STYLES.length; i++) {
-        const style = STYLES[i];
-        showStatus(`Sedang render <strong>${style.label}</strong> (${i + 1}/${STYLES.length})...`, 'info');
+      // Ambil style yang dipilih
+      const stylesToRender = STYLES.filter(s => selectedStyles.has(s.key));
+
+      for (let i = 0; i < stylesToRender.length; i++) {
+        const style = stylesToRender[i];
+        showStatus(`Sedang render <strong>${style.label}</strong> (${i + 1}/${stylesToRender.length})...`, 'info');
         const result = await renderOneStyle({
           title,
           imageUrl,
           category,
           styleKey: style.key,
           index: i + 1,
-          total: STYLES.length,
+          total: stylesToRender.length,
         });
         results.push(result);
       }
 
+      const total = stylesToRender.length;
       const successCount = results.filter(r => r.ok).length;
-      if (successCount === STYLES.length) {
-        showStatus(`✅ Semua ${STYLES.length} style berhasil di-render!`, 'success');
+      if (successCount === total) {
+        showStatus(`✅ ${total} style berhasil di-render!`, 'success');
       } else if (successCount === 0) {
         showStatus(`❌ Semua render gagal. Cek console browser.`, 'error');
       } else {
-        showStatus(`⚠️ ${successCount}/${STYLES.length} style berhasil. Ada yang gagal.`, 'error');
+        showStatus(`⚠️ ${successCount}/${total} style berhasil. Ada yang gagal.`, 'error');
       }
 
       $('generateBtn').disabled = false;
-      $('generateBtn').textContent = '✨ Generate Semua Style';
+      updateGenerateBtnLabel();
     });
 
     // Init
     renderPreviewCards();
+    renderStyleCheckboxes();
     prefillFromQuery();
+
+    // Event: Pilih Semua
+    document.getElementById('selectAllBtn')?.addEventListener('click', () => {
+      STYLES.forEach(s => selectedStyles.add(s.key));
+      renderStyleCheckboxes();
+    });
+
+    // Event: Kosongkan
+    document.getElementById('clearAllBtn')?.addEventListener('click', () => {
+      selectedStyles.clear();
+      renderStyleCheckboxes();
+    });
 
     // Baca query param & auto-isi form
     // Contoh: /admin/pin-generator.html?title=Rak+Ambalan&category=Dekorasi&image=/images/blog/foto.jpg&cta=Simak+yuk
