@@ -33,7 +33,7 @@ export default async function handler(request, response) {
   const title = typeof body.title === 'string' ? body.title.trim() : '';
   const imageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : '';
   const category = typeof body.category === 'string' ? body.category.trim() : 'Artikel';
-  const style = typeof body.style === 'string' ? body.style.trim().toLowerCase() : 'minimalis';
+  const style = typeof body.style === 'string' ? body.style.trim().toLowerCase() : 'warm';
   const shouldUpload = body.upload === true;
   const pngBase64 = typeof body.pngBase64 === 'string' ? body.pngBase64 : null;
 

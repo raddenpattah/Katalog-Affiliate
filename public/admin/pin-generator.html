@@ -215,12 +215,7 @@
   <script>
     const $ = id => document.getElementById(id);
     const STYLES = [
-      { key: 'minimalis', label: 'Minimalis' },
-      { key: 'bold', label: 'Bold' },
-      { key: 'editorial', label: 'Editorial' },
       { key: 'warm', label: 'Warm' },
-      { key: 'pastel', label: 'Pastel' },
-      { key: 'boho', label: 'Boho' },
       { key: 'poster', label: 'Poster' },
       { key: 'typography', label: 'Typography' },
     ];
@@ -230,7 +225,7 @@
     let pinMetadata = {};  // { styleKey: { blob, title, category, style, blobUrl } }
     let uploadedPins = {}; // { styleKey: { url, pathname, keywords } }
     // Default 3 style pertama ke-check
-    let selectedStyles = new Set(['minimalis', 'bold', 'warm']);
+    let selectedStyles = new Set(['warm']);
 
     function renderStyleCheckboxes() {
       const container = document.getElementById('styleCheckboxes');
