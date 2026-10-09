@@ -5,7 +5,7 @@ backend:
   base_url: https://alfeto-decap-auth.alfeto.workers.dev
   auth_endpoint: /auth
 
-publish_mode: editorial_workflow
+publish_mode: simple
 
 media_folder: public/images/blog
 public_folder: /images/blog
