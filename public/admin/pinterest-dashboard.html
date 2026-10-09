@@ -641,6 +641,7 @@
       const pins = data.pins || [];
       const grid = $('scheduleGrid');
       const list = $('scheduleList');
+      const preview = $('schedulePreview');
 
       if (!grid || !list) return;
 
@@ -688,6 +689,29 @@
             '<div><span class="badge tracked">⏳ Scheduled</span></div>' +
           '</div>';
         }).join('');
+      }
+
+      // Isi juga preview di tab Overview
+      if (preview) {
+        if (pins.length === 0) {
+          preview.innerHTML = '<div style="text-align:center;padding:20px;color:#8a7660;">Belum ada pin terjadwal.</div>';
+        } else {
+          preview.innerHTML = pins.slice(0, 5).map(p => {
+            const d = new Date(p.scheduledFor);
+            const dateStr = d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+            const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            return '<div class="pin-list-item">' +
+              '<div class="pin-info">' +
+                '<div class="pin-title">' + escapeHtml(p.title) + '</div>' +
+                '<div class="pin-meta">' +
+                  '<span>🎨 ' + escapeHtml(p.style) + '</span>' +
+                  '<span>📅 ' + dateStr + ' ' + timeStr + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div><span class="badge tracked">⏳ Scheduled</span></div>' +
+            '</div>';
+          }).join('');
+        }
       }
     }
 
