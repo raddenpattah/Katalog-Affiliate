@@ -3,7 +3,7 @@ title: 5 Inspirasi Dekorasi Ruang Tamu Minimalis Aesthetic ala Korea
 description: Buat ruang tamu mungil terasa lebih hangat dan lapang dengan
   inspirasi dekorasi minimalis ala Korea, mulai dari rak melayang hingga cermin.
 pubDate: 2026-10-06
-heroImage: /images/blog/inspirasi-dekorasi-ruang-tamu-minimalis-aesthetic-ala-korea.jpeg
+heroImage: /images/blog/inspirasi-dekorasi-ruang-tamu-minimalis-aesthetic-ala-korea.webp
 author: Alfeto Decor
 advanced:
   category: aksesoris

@@ -4,7 +4,7 @@ title: "Rahasia Pencahayaan Rumah Minimalis: Kombinasi Lampu Dinding, Meja, dan
 description: Panduan praktis menggabungkan lampu dinding, meja, dan lantai untuk
   menciptakan pencahayaan estetis pada rumah minimalis.
 pubDate: 2026-10-09
-heroImage: /images/blog/desain-lampu-hias-ruangan-untuk-ruang-tamu-rumah-minimalis-tipe-42.jpeg
+heroImage: /images/blog/desain-lampu-hias-ruangan-untuk-ruang-tamu-rumah-minimalis-tipe-42.webp
 draft: false
 advanced:
   category: lampu
@@ -37,7 +37,7 @@ Lampu dinding menjadi pilihan utama untuk menghemat ruang sekaligus menambah aks
 
 ## Lampu Meja sebagai Fokus
 
-![](/images/blog/lampu-hias-meja.jpeg)
+![](/images/blog/lampu-hias-meja.webp)
 
 Lampu meja berfungsi sebagai titik fokus visual dan sumber cahaya kerja.
 
