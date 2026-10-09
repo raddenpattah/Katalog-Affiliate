@@ -5,7 +5,7 @@ description: Panduan praktis menggabungkan lampu dinding, meja, dan lantai untuk
   menciptakan pencahayaan estetis pada rumah minimalis.
 pubDate: 2026-10-09
 heroImage: /images/blog/desain-lampu-hias-ruangan-untuk-ruang-tamu-rumah-minimalis-tipe-42.jpeg
-draft: true
+draft: false
 advanced:
   category: lampu
   tags:
