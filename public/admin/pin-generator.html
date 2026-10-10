@@ -185,6 +185,14 @@
       <input type="url" id="imageUrl" placeholder="https://... atau /images/blog/foto.jpg" />
       <div class="hint">Bisa URL absolute (https://...) atau path relatif (/images/blog/...).</div>
 
+      <div id="beforeAfterFields" style="display:none; margin-top:16px; padding:12px; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px;">
+        <div style="font-weight:600; font-size:13px; margin-bottom:8px; color:#92400e;">📸 Khusus Before/After — butuh 2 foto:</div>
+        <label for="beforeImageUrl" style="font-size:13px;">URL Foto BEFORE *</label>
+        <input type="url" id="beforeImageUrl" placeholder="https://... foto sebelum" />
+        <label for="afterImageUrl" style="font-size:13px; margin-top:8px; display:block;">URL Foto AFTER *</label>
+        <input type="url" id="afterImageUrl" placeholder="https://... foto sesudah" />
+      </div>
+
       <div class="file-input-wrap">
         <label for="imageFile">Atau upload gambar dari komputer:</label>
         <input type="file" id="imageFile" accept="image/*" />
@@ -219,6 +227,8 @@
       { key: 'poster', label: 'Poster' },
       { key: 'typography', label: 'Typography' },
       { key: 'bold-type', label: 'Bold Type' },
+      { key: 'listicle', label: 'Listicle' },
+      { key: 'before-after', label: 'Before/After', needsTwo: true },
     ];
 
     let currentBlobs = {};
@@ -245,10 +255,19 @@
             selectedStyles.delete(style.key);
           }
           updateGenerateBtnLabel();
+          toggleBeforeAfterFields();
         });
         container.appendChild(label);
       });
       updateGenerateBtnLabel();
+      toggleBeforeAfterFields();
+    }
+
+    function toggleBeforeAfterFields() {
+      const fields = document.getElementById('beforeAfterFields');
+      if (!fields) return;
+      const hasBeforeAfter = selectedStyles.has('before-after');
+      fields.style.display = hasBeforeAfter ? 'block' : 'none';
     }
 
     function updateGenerateBtnLabel() {
@@ -350,7 +369,14 @@
         const res = await fetch('/api/generate-pin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, imageUrl, category, style: styleKey }),
+          body: JSON.stringify({
+            title,
+            imageUrl,
+            beforeImageUrl: document.getElementById('beforeImageUrl')?.value || '',
+            afterImageUrl: document.getElementById('afterImageUrl')?.value || '',
+            category,
+            style: styleKey,
+          }),
         });
 
         if (!res.ok) {
@@ -402,7 +428,13 @@
       const category = $('category').value.trim() || 'Artikel';
 
       if (!title) { showStatus('Judul wajib diisi', 'error'); return; }
-      if (!imageUrl) { showStatus('URL gambar wajib diisi', 'error'); return; }
+      const hasBeforeAfter = selectedStyles.has('before-after');
+        if (!imageUrl && !hasBeforeAfter) { showStatus('URL gambar wajib diisi', 'error'); return; }
+        if (hasBeforeAfter) {
+          const bUrl = document.getElementById('beforeImageUrl')?.value?.trim();
+          const aUrl = document.getElementById('afterImageUrl')?.value?.trim();
+          if (!bUrl || !aUrl) { showStatus('Style Before/After butuh 2 foto (before + after)', 'error'); return; }
+        }
 
       $('generateBtn').disabled = true;
       $('generateBtn').textContent = 'Sedang render...';

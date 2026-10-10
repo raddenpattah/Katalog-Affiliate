@@ -32,13 +32,23 @@ export default async function handler(request, response) {
 
   const title = typeof body.title === 'string' ? body.title.trim() : '';
   const imageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : '';
+  const beforeImageUrl = typeof body.beforeImageUrl === 'string' ? body.beforeImageUrl.trim() : '';
+  const afterImageUrl = typeof body.afterImageUrl === 'string' ? body.afterImageUrl.trim() : '';
   const category = typeof body.category === 'string' ? body.category.trim() : 'Artikel';
   const style = typeof body.style === 'string' ? body.style.trim().toLowerCase() : 'warm';
   const shouldUpload = body.upload === true;
   const pngBase64 = typeof body.pngBase64 === 'string' ? body.pngBase64 : null;
 
-  if (!title || !imageUrl) {
-    return response.status(400).json({ error: 'Title dan imageUrl wajib diisi' });
+  const isBeforeAfter = style === 'before-after';
+  if (!title) {
+    return response.status(400).json({ error: 'Title wajib diisi' });
+  }
+  if (isBeforeAfter) {
+    if (!beforeImageUrl || !afterImageUrl) {
+      return response.status(400).json({ error: 'Style "before-after" butuh beforeImageUrl + afterImageUrl' });
+    }
+  } else if (!imageUrl) {
+    return response.status(400).json({ error: 'imageUrl wajib diisi' });
   }
   if (title.length > MAX_TITLE_LENGTH || category.length > MAX_CATEGORY_LENGTH) {
     return response.status(400).json({ error: 'Title atau category terlalu panjang' });
@@ -66,6 +76,8 @@ export default async function handler(request, response) {
       pngBuffer = await generatePin({
         title,
         imageUrl,
+        beforeImageUrl,
+        afterImageUrl,
         category,
         style,
         baseUrl,
