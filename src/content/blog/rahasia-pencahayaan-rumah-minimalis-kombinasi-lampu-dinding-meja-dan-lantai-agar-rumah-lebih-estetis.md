@@ -14,6 +14,11 @@ advanced:
     - desain interior
     - lampu dinding
     - lampu lantai
+  productIds:
+    - Karpet Lantai Ruang Tamu
+    - Lampu Meja Aesthetic
+    - Lampu lantai berdiri
+    - Rak Ambalan
 ---
 **Rahasia Pencahayaan Rumah Minimalis**  
 
