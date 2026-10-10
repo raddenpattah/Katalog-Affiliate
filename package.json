@@ -18,7 +18,8 @@
     "groq-sdk": "^1.6.0",
     "js-yaml": "^5.4.3",
     "openai": "^6.49.0",
-    "satori": "^0.44.3"
+    "satori": "^0.44.3",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.20",
