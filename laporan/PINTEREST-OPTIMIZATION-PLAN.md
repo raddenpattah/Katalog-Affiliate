@@ -259,3 +259,67 @@ alfeto/
 
 **File ini update terakhir:** 10 Oktober 2026
 **Next review:** 17 Oktober 2026
+
+---
+
+## 9. ROADMAP 18 BULAN
+
+### Phase 1: Fokus Shopee (0-3 bulan, Okt-Des 2026)
+- **Fokus:** 1 marketplace (Shopee), 1 blog (Alfeto), 1 niche (dekorasi rumah)
+- **Aktivitas:**
+  - Restrukturisasi board Pinterest
+  - Scale posting 20-50 pin/hari
+  - Optimasi conversion (review, CTA, deep link)
+  - Track conversion rate per produk
+- **Target:** Rp500.000-1.000.000/bulan
+
+### Phase 2: Automation (3-6 bulan, Jan-Mar 2027)
+- **Fokus:** Otomasi workflow biar scalable
+- **Aktivitas:**
+  - Auto-post Pinterest (via API / scheduler)
+  - Auto-generate pin 20-50/hari
+  - Auto-track conversion (integrasi Shopee API)
+  - Auto-generate konten blog (AI blog writer)
+- **Target:** Rp1.000.000-3.000.000/bulan
+
+### Phase 3: Multi-Marketplace (6-9 bulan, Apr-Jun 2027)
+- **Fokus:** Diversifikasi sumber komisi
+- **Aktivitas:**
+  - Tambah Tokopedia (komisi mirip Shopee)
+  - Tambah TikTok Shop (komisi persentase lebih tinggi)
+  - Tambah Amazon (kalau target global, komisi USD)
+- **Target:** Rp3.000.000-5.000.000/bulan
+
+### Phase 4: Multi-Blog (9-12 bulan, Jul-Sep 2027)
+- **Fokus:** 3 blog, 3 niche, 3 sumber income
+- **Aktivitas:**
+  - Blog 2: Amazon affiliate (English, dekorasi rumah)
+  - Blog 3: Skincare & body care (istri)
+  - Multi-akun Pinterest
+- **Target:** Rp5.000.000-10.000.000/bulan
+
+### Phase 5: Produk Digital (12-18 bulan, Okt 2027-Mar 2028)
+- **Fokus:** Margin 100%, income pasif
+- **Aktivitas:**
+  - E-book "Panduan Dekorasi Rumah Ala Korea"
+  - Template Pinterest / presets
+  - Kembalikan AI planner jadi produk SaaS
+- **Target:** Rp10.000.000-30.000.000/bulan
+
+---
+
+## 10. PERBANDINGAN MARKETPLACE
+
+| Marketplace | Komisi | Kelebihan | Kekurangan |
+|---|---|---|---|
+| **Shopee** | Rp5.000-15.000 | Traffic gede, mudah | Komisi kecil |
+| **Tokopedia** | Rp5.000-20.000 | Komisi sedikit lebih tinggi | Traffic lebih kecil |
+| **Lazada** | Rp5.000-15.000 | Tergantung kategori | Kompetisi tinggi |
+| **TikTok Shop** | 5-20% (persentase) | Komisi persentase bisa gede | Butuh video |
+| **Amazon** | 1-10% (USD) | Komisi USD, nilai tinggi | Kompetisi global |
+
+**Insight:** Produk digital (e-book, template) punya margin 100% — 5x lipat dari affiliate Shopee. Target jangka panjang.
+
+---
+
+**Roadmap update terakhir:** 10 Oktober 2026
