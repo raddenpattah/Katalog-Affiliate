@@ -48,3 +48,12 @@ next-env.d.ts
 
 # local test scripts
 test-*.mjs
+
+# Test & preview files
+public/preview/
+public/test-*.jpeg
+public/test-*.png
+*.bak
+*.bak2
+*.bak3
+*.bak4
