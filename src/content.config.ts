@@ -78,6 +78,7 @@ const produk = defineCollection({
   schema: z.object({
     id: z.string(),
     title: z.string(),
+    slug: z.string().optional(),
     titlePinterest: z.string().optional(),
     category: categorySchema,
     image: z.union([z.string().url(), z.string().regex(/^\/images\/products\/.+/)]),

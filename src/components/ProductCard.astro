@@ -6,6 +6,7 @@ interface Props {
 }
 
 const { product } = Astro.props;
+const productPageHref = `/produk/${product.slug || product.id}`;
 ---
 
 <article
@@ -38,12 +39,10 @@ const { product } = Astro.props;
   <div class="flex flex-1 flex-col p-3 sm:p-4">
     <h2 class="min-h-10 font-sans text-sm font-medium leading-5 text-stone-900 sm:min-h-12 sm:text-base sm:leading-6">
       <a
-        href={product.shopeeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={productPageHref}
         class="line-clamp-2 hover:underline focus-visible:outline-none focus-visible:underline"
       >
-      {product.title}
+        {product.title}
       </a>
     </h2>
     <a

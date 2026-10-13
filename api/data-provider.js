@@ -14,6 +14,41 @@ function readJsonDirectory(relativeDirectory) {
     .map(fileName => JSON.parse(readFileSync(path.join(directory, fileName), 'utf8')));
 }
 
+function readProducts() {
+  const directory = path.join(projectRoot, 'src/data/products');
+  const entries = readdirSync(directory)
+    .filter(fileName => fileName.endsWith('.json'))
+    .sort()
+    .map(fileName => ({
+      key: path.basename(fileName, '.json'),
+      product: JSON.parse(readFileSync(path.join(directory, fileName), 'utf8')),
+    }));
+  const idCounts = new Map();
+  const reservedSlugs = new Set(
+    entries.map(({ product }) => typeof product.slug === 'string' ? product.slug.trim() : '')
+      .filter(Boolean),
+  );
+  const usedSlugs = new Set();
+
+  for (const { product } of entries) {
+    idCounts.set(product.id, (idCounts.get(product.id) || 0) + 1);
+  }
+
+  return entries.map(({ key, product }) => {
+    const preferredSlug = typeof product.slug === 'string' ? product.slug.trim() : '';
+    let slug = preferredSlug || product.id;
+    if (
+      usedSlugs.has(slug) ||
+      (!preferredSlug && (idCounts.get(product.id) > 1 || reservedSlugs.has(product.id)))
+    ) {
+      slug = key;
+    }
+    if (usedSlugs.has(slug)) throw new Error(`Product route slug "${slug}" is not unique.`);
+    usedSlugs.add(slug);
+    return { ...product, slug };
+  });
+}
+
 function readBlogPosts() {
   const directory = path.join(projectRoot, 'src/content/blog');
   return readdirSync(directory)
@@ -36,7 +71,7 @@ function readBlogPosts() {
 function readData(type) {
   const data = {};
   if (type === 'products' || type === 'all') {
-    data.products = readJsonDirectory('src/data/products');
+    data.products = readProducts();
   }
   if (type === 'blog' || type === 'all') {
     data.blog = readBlogPosts();
