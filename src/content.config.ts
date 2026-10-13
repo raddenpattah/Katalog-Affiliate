@@ -39,7 +39,7 @@ const blog = defineCollection({
     .object({
       title: z.string(),
       description: z.string(),
-      pubDate: z.coerce.date(),
+      pubDate: z.coerce.date().optional(),
       heroImage: blogImageSchema,
       category: categorySchema.optional(),
       author: z.string().default('Alfeto'),
@@ -52,19 +52,22 @@ const blog = defineCollection({
       galleryImages: z.array(galleryImageSchema).optional(),
       productIds: z.array(z.string()).optional(),
     })
-    .transform(({ advanced, category, publishAt, seoTitle, seoDescription, tags, galleryImages, productIds, ...post }) => {
+    .transform(({ advanced, category, pubDate, publishAt, seoTitle, seoDescription, tags, galleryImages, productIds, ...post }) => {
       const resolvedCategory = advanced.category ?? category;
       if (!resolvedCategory) {
         throw new Error(`Blog post "${post.title}" must have a category.`);
       }
+      const resolvedPublishAt = advanced.publishAt ?? publishAt;
+      const resolvedPubDate = pubDate ?? resolvedPublishAt ?? new Date();
 
       return {
         ...post,
         author: 'Alfeto',
         category: resolvedCategory,
+        pubDate: resolvedPubDate,
         advanced: {
           ...advanced,
-          publishAt: advanced.publishAt ?? publishAt,
+          publishAt: resolvedPublishAt,
           seoTitle: advanced.seoTitle ?? seoTitle,
           seoDescription: advanced.seoDescription ?? seoDescription,
           tags: advanced.tags ?? tags ?? [],

@@ -232,10 +232,6 @@
       return typeof tag !== 'string' || !tag.trim();
     });
   }, toMultipleWidgetValue);
-  var AIProductIdsControl = createMetadataControl('list', 'recommendedProductIds', function (value) {
-    var items = value && typeof value.toArray === 'function' ? value.toArray() : value;
-    return !Array.isArray(items) || items.length === 0;
-  }, toMultipleWidgetValue);
   var AIInternalLinksControl = createMetadataControl('relation', 'recommendedArticles', function (value) {
     var items = value && typeof value.toArray === 'function' ? value.toArray() : value;
     return !Array.isArray(items) || items.length === 0;
@@ -327,13 +323,11 @@
               detail: {
                 description: result.description,
                 tags: result.tags,
-                recommendedProductIds: result.recommendedProductIds,
                 recommendedArticles: result.recommendedArticles,
                 ctaType: result.ctaType,
               },
             }),
           );
-          console.log('Auto-fill productIds:', result.recommendedProductIds);
           console.log('Auto-fill internalLinks:', result.recommendedArticles);
           console.log('Auto-fill ctaType:', result.ctaType);
           this.setState({
@@ -404,7 +398,6 @@
   CMS.registerWidget('ai-markdown', AIArticleControl, MarkdownPreview);
   if (AIDescriptionControl) CMS.registerWidget('ai-description', AIDescriptionControl);
   if (AITagsControl) CMS.registerWidget('ai-tags', AITagsControl);
-  if (AIProductIdsControl) CMS.registerWidget('ai-product-ids-list', AIProductIdsControl);
   if (AIInternalLinksControl) CMS.registerWidget('ai-internal-links', AIInternalLinksControl);
   if (AICTATypeControl) CMS.registerWidget('ai-cta-type', AICTATypeControl);
 })();
