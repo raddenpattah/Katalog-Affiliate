@@ -201,16 +201,11 @@ collections:
                 required: false
           - label: ID Produk
             name: productIds
-            widget: ai-product-ids
-            collection: products
-            search_fields:
-              - title
-              - id
-              - category
-            value_field: id
-            display_fields:
-              - "{{title}} ({{category}})"
-            multiple: true
+            widget: ai-product-ids-list
+            field:
+              label: ID Produk
+              name: productId
+              widget: string
             required: false
           - label: Artikel Terkait
             name: internalLinks

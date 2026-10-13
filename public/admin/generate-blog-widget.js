@@ -160,13 +160,14 @@
     return readArticleStream(response, onArticleText);
   }
 
-  function toMultipleWidgetValue(value, currentValue) {
+  function toMultipleWidgetValue(value, currentValue, defaultValue) {
+    var listValue = currentValue || defaultValue;
     if (
-      currentValue &&
-      typeof currentValue.clear === 'function' &&
-      typeof currentValue.concat === 'function'
+      listValue &&
+      typeof listValue.clear === 'function' &&
+      typeof listValue.concat === 'function'
     ) {
-      return currentValue.clear().concat(value);
+      return listValue.clear().concat(value);
     }
     return value;
   }
@@ -178,7 +179,7 @@
 
     return createClass({
       getInitialState: function () {
-        return { controlVersion: 0, selectedRelationHits: [] };
+        return { controlVersion: 0 };
       },
 
       componentDidMount: function () {
@@ -200,26 +201,9 @@
 
         if (value !== undefined && value !== null && empty) {
           console.log('Auto-fill field received:', metadataKey, value);
-          var nextValue = formatValue ? formatValue(value, currentValue) : value;
+          var defaultValue = BaseControl.defaultProps && BaseControl.defaultProps.value;
+          var nextValue = formatValue ? formatValue(value, currentValue, defaultValue) : value;
           console.log('Auto-fill field value type:', metadataKey, nextValue?.constructor?.name);
-          var selectedRelationHits = this.state.selectedRelationHits;
-          if (metadataKey === 'recommendedProductIds') {
-            var recommendedProducts = Array.isArray(event.detail.recommendedProducts)
-              ? event.detail.recommendedProducts
-              : [];
-            selectedRelationHits = recommendedProducts
-              .filter(function (product) {
-                return product && value.includes(product.id);
-              })
-              .map(function (product) {
-                return {
-                  data: product,
-                  slug: product.slug || product.id,
-                  path: 'src/data/products/' + (product.slug || product.id) + '.json',
-                };
-              });
-          }
-
           try {
             this.props.onChange(nextValue);
             console.log('onChange triggered for metadataKey:', metadataKey, nextValue);
@@ -227,27 +211,14 @@
             console.error('onChange failed for metadataKey:', metadataKey, error);
             throw error;
           }
-          this.setState({
-            controlVersion: this.state.controlVersion + 1,
-            selectedRelationHits: selectedRelationHits,
-          });
+          this.setState({ controlVersion: this.state.controlVersion + 1 });
         } else if (value !== undefined && value !== null) {
           console.log('Auto-fill skipped; field already has a value:', metadataKey);
         }
       },
 
       render: function () {
-        var controlProps = Object.assign({}, this.props, { key: this.state.controlVersion });
-        if (this.state.selectedRelationHits.length > 0) {
-          var currentHits = Array.isArray(this.props.queryHits) ? this.props.queryHits : [];
-          var hitIds = new Set(currentHits.map(function (hit) {
-            return hit && hit.data && hit.data.id;
-          }));
-          controlProps.queryHits = currentHits.concat(this.state.selectedRelationHits.filter(function (hit) {
-            return !hitIds.has(hit.data.id);
-          }));
-        }
-        return h(BaseControl, controlProps);
+        return h(BaseControl, Object.assign({}, this.props, { key: this.state.controlVersion }));
       },
     });
   }
@@ -261,7 +232,7 @@
       return typeof tag !== 'string' || !tag.trim();
     });
   }, toMultipleWidgetValue);
-  var AIProductIdsControl = createMetadataControl('relation', 'recommendedProductIds', function (value) {
+  var AIProductIdsControl = createMetadataControl('list', 'recommendedProductIds', function (value) {
     var items = value && typeof value.toArray === 'function' ? value.toArray() : value;
     return !Array.isArray(items) || items.length === 0;
   }, toMultipleWidgetValue);
@@ -357,9 +328,6 @@
                 description: result.description,
                 tags: result.tags,
                 recommendedProductIds: result.recommendedProductIds,
-                recommendedProducts: productsData.products.filter(function (product) {
-                  return result.recommendedProductIds.includes(product.id);
-                }),
                 recommendedArticles: result.recommendedArticles,
                 ctaType: result.ctaType,
               },
@@ -436,7 +404,7 @@
   CMS.registerWidget('ai-markdown', AIArticleControl, MarkdownPreview);
   if (AIDescriptionControl) CMS.registerWidget('ai-description', AIDescriptionControl);
   if (AITagsControl) CMS.registerWidget('ai-tags', AITagsControl);
-  if (AIProductIdsControl) CMS.registerWidget('ai-product-ids', AIProductIdsControl);
+  if (AIProductIdsControl) CMS.registerWidget('ai-product-ids-list', AIProductIdsControl);
   if (AIInternalLinksControl) CMS.registerWidget('ai-internal-links', AIInternalLinksControl);
   if (AICTATypeControl) CMS.registerWidget('ai-cta-type', AICTATypeControl);
 })();
