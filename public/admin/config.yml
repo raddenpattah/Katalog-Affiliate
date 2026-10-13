@@ -201,7 +201,7 @@ collections:
                 required: false
           - label: ID Produk
             name: productIds
-            widget: relation
+            widget: ai-product-ids
             collection: products
             search_fields:
               - title
@@ -211,6 +211,28 @@ collections:
             display_fields:
               - "{{title}} ({{category}})"
             multiple: true
+            required: false
+          - label: Artikel Terkait
+            name: internalLinks
+            widget: ai-internal-links
+            collection: blog
+            search_fields:
+              - title
+              - description
+            value_field: "{{slug}}"
+            display_fields:
+              - "{{title}}"
+            multiple: true
+            required: false
+          - label: Tipe CTA
+            name: ctaType
+            widget: select
+            options:
+              - label: Produk
+                value: product
+              - label: Artikel
+                value: article
+            default: product
             required: false
           - label: CTA Pin (opsional)
             name: pinCta

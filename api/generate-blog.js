@@ -4,6 +4,37 @@ import { generateArticle } from '../lib/ai-provider.js';
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_CATEGORY_LENGTH = 100;
+const MAX_PRODUCTS = 60;
+const MAX_BLOG_CONTEXT = 20;
+
+function normalizeProducts(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter(product => product && typeof product === 'object' && !Array.isArray(product))
+    .slice(0, MAX_PRODUCTS)
+    .map(product => ({
+      id: typeof product.id === 'string' ? product.id.trim().slice(0, 180) : '',
+      slug: typeof product.slug === 'string' ? product.slug.trim().slice(0, 180) : '',
+      title: typeof product.title === 'string' ? product.title.trim().slice(0, 200) : '',
+      category: typeof product.category === 'string' ? product.category.trim().slice(0, 100) : '',
+      description: typeof product.description === 'string' ? product.description.trim().slice(0, 500) : '',
+    }))
+    .filter(product => product.id && product.title);
+}
+
+function normalizeBlogContext(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter(article => article && typeof article === 'object' && !Array.isArray(article))
+    .slice(0, MAX_BLOG_CONTEXT)
+    .map(article => ({
+      id: typeof article.id === 'string' ? article.id.trim().slice(0, 180) : '',
+      title: typeof article.title === 'string' ? article.title.trim().slice(0, 200) : '',
+      description: typeof article.description === 'string' ? article.description.trim().slice(0, 400) : '',
+      category: typeof article.category === 'string' ? article.category.trim().slice(0, 100) : '',
+    }))
+    .filter(article => article.id && article.title);
+}
 
 // Cek apakah minimal ada satu provider AI yang dikonfigurasi.
 function hasAnyProviderConfigured() {
@@ -36,12 +67,17 @@ export default async function handler(request, response) {
 
   const title = typeof body.title === 'string' ? body.title.trim() : '';
   const category = typeof body.category === 'string' ? body.category.trim() : '';
+  const products = normalizeProducts(body.products);
+  const blogContext = normalizeBlogContext(body.blogContext);
 
   if (!title || !category) {
     return response.status(400).json({ error: 'Title and category are required' });
   }
   if (title.length > MAX_TITLE_LENGTH || category.length > MAX_CATEGORY_LENGTH) {
     return response.status(400).json({ error: 'Title or category is too long' });
+  }
+  if (products.length < 3 || blogContext.length < 2) {
+    return response.status(400).json({ error: 'Minimal 3 produk dan 2 artikel konteks diperlukan' });
   }
 
   if (!hasAnyProviderConfigured()) {
@@ -59,12 +95,16 @@ export default async function handler(request, response) {
     const generated = await generateArticle({
       title,
       category,
+      products,
+      blogContext,
       onArticleChunk: text => sendEvent({ type: 'article', text }),
     });
     sendEvent({
       type: 'metadata',
       description: generated.description,
       tags: generated.tags,
+      recommendedProductIds: generated.recommendedProductIds,
+      recommendedArticles: generated.recommendedArticles,
     });
     sendEvent({ type: 'done' });
     return response.end();

@@ -81,7 +81,16 @@
         typeof event.description === 'string' &&
         Array.isArray(event.tags)
       ) {
-        metadata = { description: event.description, tags: event.tags };
+        metadata = {
+          description: event.description,
+          tags: event.tags,
+          recommendedProductIds: Array.isArray(event.recommendedProductIds)
+            ? event.recommendedProductIds
+            : [],
+          recommendedArticles: Array.isArray(event.recommendedArticles)
+            ? event.recommendedArticles
+            : [],
+        };
       } else if (event.type === 'done') {
         completed = true;
       }
@@ -103,14 +112,23 @@
       reader.releaseLock();
     }
 
-    if (!completed || !article.trim() || !metadata || !metadata.description.trim()) {
-      throw new Error('Server tidak mengembalikan artikel beserta metadata yang lengkap.');
+    if (
+      !completed ||
+      !article.trim() ||
+      !metadata ||
+      !metadata.description.trim() ||
+      metadata.recommendedProductIds.length < 3 ||
+      metadata.recommendedArticles.length < 2
+    ) {
+      throw new Error('Server tidak mengembalikan artikel dan rekomendasi yang lengkap.');
     }
 
     return {
       article: article,
       description: metadata.description,
       tags: metadata.tags,
+      recommendedProductIds: metadata.recommendedProductIds,
+      recommendedArticles: metadata.recommendedArticles,
     };
   }
 
@@ -178,6 +196,14 @@
       return typeof tag !== 'string' || !tag.trim();
     });
   });
+  var AIProductIdsControl = createMetadataControl('relation', 'recommendedProductIds', function (value) {
+    var items = value && typeof value.toArray === 'function' ? value.toArray() : value;
+    return !Array.isArray(items) || items.length === 0;
+  });
+  var AIInternalLinksControl = createMetadataControl('relation', 'recommendedArticles', function (value) {
+    var items = value && typeof value.toArray === 'function' ? value.toArray() : value;
+    return !Array.isArray(items) || items.length === 0;
+  });
 
   var AIArticleControl = createClass({
     getInitialState: function () {
@@ -209,9 +235,31 @@
 
       var previousArticle = typeof this.props.value === 'string' ? this.props.value : '';
       var streamedArticle = false;
-      var payload = { title: title, category: category };
       this.setState({ loading: true, message: 'Artikel sedang dibuat…', error: false });
       try {
+        var dataResponses = await Promise.all([
+          fetch('/api/data-provider?type=products'),
+          fetch('/api/data-provider?type=blog'),
+        ]);
+        if (!dataResponses[0].ok || !dataResponses[1].ok) {
+          throw new Error('Data produk atau artikel tidak dapat dimuat.');
+        }
+        var productsData = await dataResponses[0].json();
+        var blogData = await dataResponses[1].json();
+        if (
+          !Array.isArray(productsData.products) ||
+          productsData.products.length < 3 ||
+          !Array.isArray(blogData.blog) ||
+          blogData.blog.length < 2
+        ) {
+          throw new Error('Minimal 3 produk dan 2 artikel konteks diperlukan.');
+        }
+        var payload = {
+          title: title,
+          category: category,
+          products: productsData.products,
+          blogContext: blogData.blog,
+        };
         console.log('Payload sent to API:', payload);
         var result = await generateArticle(payload, function (articleText) {
           streamedArticle = true;
@@ -223,7 +271,11 @@
           !result.article.trim() ||
           typeof result.description !== 'string' ||
           !result.description.trim() ||
-          !Array.isArray(result.tags)
+          !Array.isArray(result.tags) ||
+          !Array.isArray(result.recommendedProductIds) ||
+          result.recommendedProductIds.length < 3 ||
+          !Array.isArray(result.recommendedArticles) ||
+          result.recommendedArticles.length < 2
         ) {
           throw new Error('Server tidak mengembalikan artikel beserta metadata yang lengkap.');
         }
@@ -232,11 +284,16 @@
           this.props.onChange(result.article);
           window.dispatchEvent(
             new CustomEvent(metadataEventName, {
-              detail: { description: result.description, tags: result.tags },
+              detail: {
+                description: result.description,
+                tags: result.tags,
+                recommendedProductIds: result.recommendedProductIds,
+                recommendedArticles: result.recommendedArticles,
+              },
             }),
           );
           this.setState({
-            message: 'Artikel, deskripsi, dan tags dibuat. Field yang sudah terisi tetap dipertahankan.',
+            message: 'Artikel, metadata, dan rekomendasi dibuat. Field yang sudah terisi tetap dipertahankan.',
             error: false,
           });
         });
@@ -303,4 +360,6 @@
   CMS.registerWidget('ai-markdown', AIArticleControl, MarkdownPreview);
   if (AIDescriptionControl) CMS.registerWidget('ai-description', AIDescriptionControl);
   if (AITagsControl) CMS.registerWidget('ai-tags', AITagsControl);
+  if (AIProductIdsControl) CMS.registerWidget('ai-product-ids', AIProductIdsControl);
+  if (AIInternalLinksControl) CMS.registerWidget('ai-internal-links', AIInternalLinksControl);
 })();

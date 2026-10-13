@@ -29,6 +29,8 @@ const advancedBlogSettingsSchema = z.object({
   tags: z.array(z.string()).optional(),
   galleryImages: z.array(galleryImageSchema).optional(),
   productIds: z.array(z.string()).optional(),
+  internalLinks: z.array(z.string()).optional(),
+  ctaType: z.enum(['product', 'article']).optional(),
 });
 
 const blog = defineCollection({
