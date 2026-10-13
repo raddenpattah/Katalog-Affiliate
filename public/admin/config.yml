@@ -60,10 +60,13 @@ collections:
         widget: string
       - label: Nama Produk
         name: title
-        widget: string
+        widget: ai-product-title
+      - label: Slug
+        name: slug
+        widget: ai-product-slug
       - label: Deskripsi Produk
         name: description
-        widget: text
+        widget: ai-product-description
         required: false
       - label: Kategori
         name: category
@@ -81,6 +84,20 @@ collections:
         media_folder: /public/images/products
         public_folder: /images/products
         choose_url: true
+      - label: Gambar Tambahan
+        name: gambar_tambahan
+        widget: list
+        required: false
+        field:
+          label: Gambar
+          name: gambar
+          widget: image
+          media_folder: /public/images/products
+          public_folder: /images/products
+      - label: Spesifikasi
+        name: spesifikasi
+        widget: ai-product-specifications
+        required: false
       - label: Link Shopee
         name: shopeeUrl
         widget: string
