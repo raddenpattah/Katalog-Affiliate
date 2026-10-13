@@ -60,7 +60,13 @@ collections:
         widget: string
       - label: Nama Produk
         name: title
-        widget: ai-product-title
+        widget: string
+        hint: Nama asli dari Shopee (jangan diubah)
+      - label: Title Pinterest
+        name: titlePinterest
+        widget: ai-product-title-pinterest
+        hint: Judul pendek untuk Pinterest — klik AI untuk generate
+        required: false
       - label: Slug
         name: slug
         widget: ai-product-slug

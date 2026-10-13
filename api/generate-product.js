@@ -22,6 +22,18 @@ export default async function handler(request, response) {
   const title = typeof body.title === 'string' ? body.title.trim() : '';
   const category = typeof body.category === 'string' ? body.category.trim() : '';
   const description = typeof body.description === 'string' ? body.description.trim() : '';
+  const blogContext = Array.isArray(body.blogContext)
+    ? body.blogContext
+      .filter(item => item && typeof item === 'object' && !Array.isArray(item))
+      .slice(0, 8)
+      .map(item => ({
+        title: typeof item.title === 'string' ? item.title.trim().slice(0, 160) : '',
+        description: typeof item.description === 'string' ? item.description.trim().slice(0, 300) : '',
+        category: typeof item.category === 'string' ? item.category.trim().slice(0, 80) : '',
+        pubDate: typeof item.pubDate === 'string' ? item.pubDate.slice(0, 20) : '',
+      }))
+      .filter(item => item.title)
+    : [];
 
   if (!title || !category) {
     return response.status(400).json({ error: 'Title and category are required' });
@@ -35,8 +47,22 @@ export default async function handler(request, response) {
   }
 
   try {
-    const product = await generateProduct({ title, category, description });
-    return response.status(200).json(product);
+    const articleContext = blogContext.length > 0
+      ? `\n\nKonteks artikel terkait untuk inspirasi tema (jangan mengarang isi artikel):\n${blogContext
+        .map(item => `- ${item.title}${item.category ? ` (${item.category})` : ''}: ${item.description}`)
+        .join('\n')}`
+      : '';
+    const product = await generateProduct({
+      title,
+      category,
+      description: `${description}${articleContext}`.trim(),
+    });
+    return response.status(200).json({
+      slug: product.slug,
+      titlePinterest: product.title,
+      description: product.description,
+      spesifikasi: product.spesifikasi,
+    });
   } catch (error) {
     console.error('AI product generation failed:', error);
     return response.status(502).json({

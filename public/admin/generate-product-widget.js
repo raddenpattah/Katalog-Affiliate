@@ -68,14 +68,13 @@
   var AIDescriptionControl = createGeneratedControl('text', 'description');
   var AISpecificationsControl = createGeneratedControl('list', 'spesifikasi');
 
-  var AIProductTitleControl = createClass({
+  var AIPinterestTitleControl = createClass({
     getInitialState: function () {
       return { loading: false, message: '', error: false };
     },
 
     generateProduct: async function () {
-      var title = (typeof this.props.value === 'string' && this.props.value.trim())
-        || readCurrentField('Nama Produk');
+      var title = readEntryValue(this.props.entry, ['data', 'title']) || readCurrentField('Nama Produk');
       var category = readCurrentField('Kategori') || readEntryValue(this.props.entry, ['data', 'category']);
       var description = readEntryValue(this.props.entry, ['data', 'description']);
 
@@ -86,10 +85,26 @@
 
       this.setState({ loading: true, message: '⏳ Generating...', error: false });
       try {
+        var blogContext = [];
+        try {
+          var blogResponse = await fetch('/api/data-provider?type=blog');
+          if (blogResponse.ok) {
+            var blogData = await blogResponse.json();
+            if (Array.isArray(blogData.blog)) blogContext = blogData.blog;
+          }
+        } catch (error) {
+          console.warn('Data artikel tidak tersedia; generator tetap dilanjutkan.', error);
+        }
+
         var response = await fetch('/api/generate-product', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: title, category: category, description: description }),
+          body: JSON.stringify({
+            title: title,
+            category: category,
+            description: description,
+            blogContext: blogContext,
+          }),
         });
         var result = await response.json();
         if (!response.ok) {
@@ -97,14 +112,14 @@
         }
         if (
           typeof result.slug !== 'string' ||
-          typeof result.title !== 'string' ||
+          typeof result.titlePinterest !== 'string' ||
           typeof result.description !== 'string' ||
           !Array.isArray(result.spesifikasi)
         ) {
           throw new Error('Server tidak mengembalikan field produk yang lengkap.');
         }
 
-        this.props.onChange(result.title);
+        this.props.onChange(result.titlePinterest);
         window.dispatchEvent(new CustomEvent(productEventName, { detail: result }));
         this.setState({ message: '✅ Berhasil!', error: false });
       } catch (error) {
@@ -163,7 +178,7 @@
     },
   });
 
-  CMS.registerWidget('ai-product-title', AIProductTitleControl);
+  CMS.registerWidget('ai-product-title-pinterest', AIPinterestTitleControl);
   if (AISlugControl) CMS.registerWidget('ai-product-slug', AISlugControl);
   if (AIDescriptionControl) CMS.registerWidget('ai-product-description', AIDescriptionControl);
   if (AISpecificationsControl) CMS.registerWidget('ai-product-specifications', AISpecificationsControl);
