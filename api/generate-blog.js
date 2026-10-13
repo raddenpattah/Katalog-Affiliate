@@ -105,6 +105,7 @@ export default async function handler(request, response) {
       tags: generated.tags,
       recommendedProductIds: generated.recommendedProductIds,
       recommendedArticles: generated.recommendedArticles,
+      ctaType: generated.ctaType,
     });
     sendEvent({ type: 'done' });
     return response.end();

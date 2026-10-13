@@ -90,6 +90,9 @@
           recommendedArticles: Array.isArray(event.recommendedArticles)
             ? event.recommendedArticles
             : [],
+          ctaType: event.ctaType === 'product' || event.ctaType === 'article'
+            ? event.ctaType
+            : '',
         };
       } else if (event.type === 'done') {
         completed = true;
@@ -118,7 +121,8 @@
       !metadata ||
       !metadata.description.trim() ||
       metadata.recommendedProductIds.length < 3 ||
-      metadata.recommendedArticles.length < 2
+      metadata.recommendedArticles.length < 2 ||
+      !metadata.ctaType
     ) {
       throw new Error('Server tidak mengembalikan artikel dan rekomendasi yang lengkap.');
     }
@@ -129,6 +133,7 @@
       tags: metadata.tags,
       recommendedProductIds: metadata.recommendedProductIds,
       recommendedArticles: metadata.recommendedArticles,
+      ctaType: metadata.ctaType,
     };
   }
 
@@ -155,14 +160,25 @@
     return readArticleStream(response, onArticleText);
   }
 
-  function createMetadataControl(widgetName, metadataKey, isEmpty) {
+  function toMultipleWidgetValue(value, currentValue) {
+    if (
+      currentValue &&
+      typeof currentValue.clear === 'function' &&
+      typeof currentValue.concat === 'function'
+    ) {
+      return currentValue.clear().concat(value);
+    }
+    return value;
+  }
+
+  function createMetadataControl(widgetName, metadataKey, isEmpty, formatValue) {
     var widget = CMS.resolveWidget(widgetName);
     var BaseControl = widget && widget.control;
     if (!BaseControl) return null;
 
     return createClass({
       getInitialState: function () {
-        return { controlVersion: 0 };
+        return { controlVersion: 0, selectedRelationHits: [] };
       },
 
       componentDidMount: function () {
@@ -175,14 +191,63 @@
 
       handleGeneratedMetadata: function (event) {
         var value = event.detail && event.detail[metadataKey];
-        if (value && isEmpty(this.props.value)) {
-          this.props.onChange(value);
-          this.setState({ controlVersion: this.state.controlVersion + 1 });
+        var currentValue = this.props.value;
+        var empty = isEmpty(currentValue);
+        console.log('Set value for metadataKey:', metadataKey, value);
+        console.log('Current field value:', currentValue);
+        console.log('Value type:', typeof currentValue, currentValue?.constructor?.name);
+        console.log('Is empty?', empty);
+
+        if (value !== undefined && value !== null && empty) {
+          console.log('Auto-fill field received:', metadataKey, value);
+          var nextValue = formatValue ? formatValue(value, currentValue) : value;
+          console.log('Auto-fill field value type:', metadataKey, nextValue?.constructor?.name);
+          var selectedRelationHits = this.state.selectedRelationHits;
+          if (metadataKey === 'recommendedProductIds') {
+            var recommendedProducts = Array.isArray(event.detail.recommendedProducts)
+              ? event.detail.recommendedProducts
+              : [];
+            selectedRelationHits = recommendedProducts
+              .filter(function (product) {
+                return product && value.includes(product.id);
+              })
+              .map(function (product) {
+                return {
+                  data: product,
+                  slug: product.slug || product.id,
+                  path: 'src/data/products/' + (product.slug || product.id) + '.json',
+                };
+              });
+          }
+
+          try {
+            this.props.onChange(nextValue);
+            console.log('onChange triggered for metadataKey:', metadataKey, nextValue);
+          } catch (error) {
+            console.error('onChange failed for metadataKey:', metadataKey, error);
+            throw error;
+          }
+          this.setState({
+            controlVersion: this.state.controlVersion + 1,
+            selectedRelationHits: selectedRelationHits,
+          });
+        } else if (value !== undefined && value !== null) {
+          console.log('Auto-fill skipped; field already has a value:', metadataKey);
         }
       },
 
       render: function () {
-        return h(BaseControl, Object.assign({}, this.props, { key: this.state.controlVersion }));
+        var controlProps = Object.assign({}, this.props, { key: this.state.controlVersion });
+        if (this.state.selectedRelationHits.length > 0) {
+          var currentHits = Array.isArray(this.props.queryHits) ? this.props.queryHits : [];
+          var hitIds = new Set(currentHits.map(function (hit) {
+            return hit && hit.data && hit.data.id;
+          }));
+          controlProps.queryHits = currentHits.concat(this.state.selectedRelationHits.filter(function (hit) {
+            return !hitIds.has(hit.data.id);
+          }));
+        }
+        return h(BaseControl, controlProps);
       },
     });
   }
@@ -195,14 +260,17 @@
     return !Array.isArray(tags) || tags.length === 0 || tags.every(function (tag) {
       return typeof tag !== 'string' || !tag.trim();
     });
-  });
+  }, toMultipleWidgetValue);
   var AIProductIdsControl = createMetadataControl('relation', 'recommendedProductIds', function (value) {
     var items = value && typeof value.toArray === 'function' ? value.toArray() : value;
     return !Array.isArray(items) || items.length === 0;
-  });
+  }, toMultipleWidgetValue);
   var AIInternalLinksControl = createMetadataControl('relation', 'recommendedArticles', function (value) {
     var items = value && typeof value.toArray === 'function' ? value.toArray() : value;
     return !Array.isArray(items) || items.length === 0;
+  }, toMultipleWidgetValue);
+  var AICTATypeControl = createMetadataControl('select', 'ctaType', function (value) {
+    return value !== 'product' && value !== 'article';
   });
 
   var AIArticleControl = createClass({
@@ -275,7 +343,8 @@
           !Array.isArray(result.recommendedProductIds) ||
           result.recommendedProductIds.length < 3 ||
           !Array.isArray(result.recommendedArticles) ||
-          result.recommendedArticles.length < 2
+          result.recommendedArticles.length < 2 ||
+          (result.ctaType !== 'product' && result.ctaType !== 'article')
         ) {
           throw new Error('Server tidak mengembalikan artikel beserta metadata yang lengkap.');
         }
@@ -288,10 +357,17 @@
                 description: result.description,
                 tags: result.tags,
                 recommendedProductIds: result.recommendedProductIds,
+                recommendedProducts: productsData.products.filter(function (product) {
+                  return result.recommendedProductIds.includes(product.id);
+                }),
                 recommendedArticles: result.recommendedArticles,
+                ctaType: result.ctaType,
               },
             }),
           );
+          console.log('Auto-fill productIds:', result.recommendedProductIds);
+          console.log('Auto-fill internalLinks:', result.recommendedArticles);
+          console.log('Auto-fill ctaType:', result.ctaType);
           this.setState({
             message: 'Artikel, metadata, dan rekomendasi dibuat. Field yang sudah terisi tetap dipertahankan.',
             error: false,
@@ -362,4 +438,5 @@
   if (AITagsControl) CMS.registerWidget('ai-tags', AITagsControl);
   if (AIProductIdsControl) CMS.registerWidget('ai-product-ids', AIProductIdsControl);
   if (AIInternalLinksControl) CMS.registerWidget('ai-internal-links', AIInternalLinksControl);
+  if (AICTATypeControl) CMS.registerWidget('ai-cta-type', AICTATypeControl);
 })();

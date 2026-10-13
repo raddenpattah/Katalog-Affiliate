@@ -226,7 +226,7 @@ collections:
             required: false
           - label: Tipe CTA
             name: ctaType
-            widget: select
+            widget: ai-cta-type
             options:
               - label: Produk
                 value: product
