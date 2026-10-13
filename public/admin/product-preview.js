@@ -5,6 +5,10 @@ const ProductCatalogPreview = createClass({
     const image = imagePath ? this.props.getAsset(imagePath).toString() : '';
     const shopeeUrl = data.get('shopeeUrl');
     const badge = data.get('badge');
+    const productRoute = data.get('slug') || data.get('id');
+    const reviewUrl = productRoute
+      ? `https://alfeto.vercel.app/produk/${encodeURIComponent(productRoute)}`
+      : '';
 
     return h(
       'main',
@@ -70,6 +74,30 @@ const ProductCatalogPreview = createClass({
                   shopeeUrl,
                 )
               : 'Belum diisi',
+            reviewUrl &&
+              h(
+                'div',
+                { style: { marginTop: '10px' } },
+                h(
+                  'a',
+                  {
+                    href: reviewUrl,
+                    rel: 'noopener noreferrer',
+                    target: '_blank',
+                    style: {
+                      background: '#292524',
+                      borderRadius: '4px',
+                      color: '#fff',
+                      display: 'inline-block',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      padding: '7px 10px',
+                      textDecoration: 'none',
+                    },
+                  },
+                  'Review di Alfeto ↗',
+                ),
+              ),
             badge &&
               h(
                 'span',
