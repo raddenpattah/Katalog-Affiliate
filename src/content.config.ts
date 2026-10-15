@@ -90,6 +90,8 @@ const produk = defineCollection({
     shopeeUrl: z.string().url(),
     badge: z.string().optional(),
     description: z.string().optional(),
+    metaDescription: z.string().max(160).optional(),
+    specs: z.array(z.string()).optional(),
   }),
 });
 

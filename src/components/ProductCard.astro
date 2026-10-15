@@ -7,6 +7,8 @@ interface Props {
 
 const { product } = Astro.props;
 const productPageHref = `/produk/${product.slug}`;
+const productTitle = product.title.replace(/\s+/g, ' ').trim();
+const productDescription = product.description?.trim();
 ---
 
 <article
@@ -16,11 +18,11 @@ const productPageHref = `/produk/${product.slug}`;
   <div class="relative aspect-square overflow-hidden bg-stone-100">
     <a
       href={productPageHref}
-      aria-label={`Lihat detail ${product.title}`}
+      aria-label={`Lihat detail ${productTitle}`}
     >
       <img
         src={product.image}
-        alt={product.title}
+        alt={productTitle}
         class="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.03]"
         loading="lazy"
         width="900"
@@ -40,12 +42,12 @@ const productPageHref = `/produk/${product.slug}`;
         href={productPageHref}
         class="line-clamp-2 hover:underline focus-visible:outline-none focus-visible:underline"
       >
-        {product.title}
+        {productTitle}
       </a>
     </h2>
-    {product.description && (
+    {productDescription && (
       <p class="mt-2 line-clamp-2 text-xs leading-5 text-stone-600">
-        {product.description}
+        {productDescription}
       </p>
     )}
     <a

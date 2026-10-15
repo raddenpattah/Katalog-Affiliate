@@ -6,11 +6,14 @@ export interface Product {
   id: string;
   title: string;
   slug?: string;
+  titlePinterest?: string;
   category: ProductCategory;
   image: string;
   shopeeUrl: string;
   badge?: string;
   description?: string;
+  metaDescription?: string;
+  specs?: string[];
 }
 
 interface ProductRouteSource {

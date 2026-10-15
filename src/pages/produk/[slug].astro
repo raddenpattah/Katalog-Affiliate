@@ -56,9 +56,15 @@ export async function getStaticPaths() {
 }
 
 const { product, recommendations, relatedArticles } = Astro.props;
-const description = product.description?.trim()
-  || `Pilihan ${categoryLabels[product.category].toLowerCase()} untuk mempercantik ruang. Lihat detail dan penawaran produk ini di Shopee.`;
-const productTitle = product.titlePinterest?.trim() || product.title;
+const productDescription = product.description?.trim();
+const fallbackDescription =
+  `Pilihan ${categoryLabels[product.category].toLowerCase()} untuk mempercantik ruang. Lihat detail dan penawaran produk ini di Shopee.`;
+const descriptionForMetadata = productDescription || fallbackDescription;
+const metaDescription = product.metaDescription?.trim()
+  || (descriptionForMetadata.length <= 155
+    ? descriptionForMetadata
+    : `${descriptionForMetadata.slice(0, 152).replace(/\s+\S*$/, '').trimEnd()}...`);
+const productTitle = product.title.replace(/\s+/g, ' ').trim();
 const socialImage = Astro.site ? new URL(product.image, Astro.site).href : product.image;
 ---
 
@@ -67,18 +73,18 @@ const socialImage = Astro.site ? new URL(product.image, Astro.site).href : produ
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="p:domain_verify" content="63cbf7dea4ba5f9335e79eecc975eb9a" />
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     <title>{productTitle} | Alfeto</title>
     <meta property="og:type" content="product" />
     <meta property="og:site_name" content="Alfeto" />
     <meta property="og:title" content={`${productTitle} | Alfeto`} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:image" content={socialImage} />
-    <meta property="og:image:alt" content={product.title} />
+    <meta property="og:image:alt" content={productTitle} />
     <meta property="og:locale" content="id_ID" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${productTitle} | Alfeto`} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={socialImage} />
   </head>
   <body class="min-h-screen bg-[#faf9f6] font-sans antialiased text-gray-900">
@@ -102,6 +108,7 @@ const socialImage = Astro.site ? new URL(product.image, Astro.site).href : produ
             class="aspect-[4/5] w-full object-cover sm:aspect-[4/3] lg:aspect-[4/5]"
             width="1200"
             height="1500"
+            loading="eager"
             fetchpriority="high"
           />
           {product.badge && (
@@ -122,12 +129,17 @@ const socialImage = Astro.site ? new URL(product.image, Astro.site).href : produ
             {productTitle}
           </h1>
           <p class="mt-5 max-w-xl text-sm leading-7 text-stone-600 sm:text-base sm:leading-8">
-            {description}
+            {productDescription || fallbackDescription}
           </p>
+          {product.specs && product.specs.length > 0 && (
+            <ul class="mt-4 list-disc space-y-1 pl-5 text-sm leading-6 text-stone-600 sm:text-base sm:leading-7">
+              {product.specs.map((spec) => <li>{spec}</li>)}
+            </ul>
+          )}
           <a
             href={product.shopeeUrl}
             target="_blank"
-            rel="sponsored noopener noreferrer"
+            rel="nofollow sponsored noopener"
             class="mt-7 hidden min-h-12 items-center justify-center gap-2 rounded-lg bg-stone-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-500 focus-visible:ring-offset-2 sm:mt-9 sm:inline-flex sm:min-h-14 sm:text-base"
           >
             Cek Promo di Shopee <span aria-hidden="true">↗</span>
@@ -198,7 +210,7 @@ const socialImage = Astro.site ? new URL(product.image, Astro.site).href : produ
       <a
         href={product.shopeeUrl}
         target="_blank"
-        rel="sponsored noopener noreferrer"
+        rel="nofollow sponsored noopener"
         class="mx-auto flex min-h-12 max-w-xl items-center justify-center gap-2 rounded-lg bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-500 focus-visible:ring-offset-2"
       >
         Cek Promo di Shopee <span aria-hidden="true">↗</span>
