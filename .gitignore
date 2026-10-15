@@ -66,3 +66,5 @@ public/test-*.png
 *.bak2
 *.bak3
 *.bak4
+check-blob.mjs
+test-*.mjs
