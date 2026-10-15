@@ -5,6 +5,12 @@ const ProductCatalogPreview = createClass({
     const image = imagePath ? this.props.getAsset(imagePath).toString() : '';
     const shopeeUrl = data.get('shopeeUrl');
     const badge = data.get('badge');
+    const specsData = data.get('specs');
+    const specs = specsData && typeof specsData.toArray === 'function'
+      ? specsData.toArray()
+      : Array.isArray(specsData)
+        ? specsData
+        : [];
     const productRoute = data.get('slug') || data.get('id');
     const reviewUrl = productRoute
       ? `https://alfeto.vercel.app/produk/${encodeURIComponent(productRoute)}`
@@ -54,6 +60,34 @@ const ProductCatalogPreview = createClass({
           'div',
           { style: { minWidth: '0' } },
           h('h1', { style: { fontSize: '18px', margin: '0 0 6px' } }, data.get('title') || 'Produk baru'),
+          data.get('titlePinterest') &&
+            h(
+              'p',
+              { style: { color: '#57534e', fontSize: '13px', margin: '0 0 8px' } },
+              h('strong', {}, 'Title Pinterest: '),
+              data.get('titlePinterest'),
+            ),
+          data.get('description') &&
+            h(
+              'p',
+              { style: { color: '#44403c', fontSize: '13px', lineHeight: '1.6', margin: '0 0 8px', whiteSpace: 'pre-wrap' } },
+              data.get('description'),
+            ),
+          data.get('metaDescription') &&
+            h(
+              'p',
+              { style: { color: '#57534e', fontSize: '12px', lineHeight: '1.5', margin: '0 0 8px' } },
+              h('strong', {}, 'Meta description: '),
+              data.get('metaDescription'),
+            ),
+          specs.length > 0 &&
+            h(
+              'ul',
+              { style: { color: '#57534e', fontSize: '12px', listStyle: 'disc', margin: '0 0 8px', paddingLeft: '18px' } },
+              specs.map(function (spec, index) {
+                return h('li', { key: index }, spec);
+              }),
+            ),
           h(
             'p',
             { style: { color: '#57534e', fontSize: '12px', lineHeight: '1.6', margin: '0' } },

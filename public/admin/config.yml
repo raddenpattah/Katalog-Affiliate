@@ -57,23 +57,44 @@ collections:
     fields:
       - label: ID Produk
         name: id
-        widget: string
+        widget: ai-product-id
+        required: true
+        hint: ID produk baru harus kebab-case huruf kecil; ID lama boleh tetap dipakai tanpa perubahan
       - label: Nama Produk
         name: title
-        widget: string
-        hint: Nama asli dari Shopee (jangan diubah)
+        widget: ai-product-title
+        hint: Judul rapi untuk blog, maksimal 60 karakter; dapat dibuat dengan AI dari deskripsi Shopee
       - label: Title Pinterest
         name: titlePinterest
         widget: ai-product-title-pinterest
-        hint: Judul pendek untuk Pinterest — klik AI untuk generate
+        pattern:
+          - '^[\s\S]{0,90}$'
+          - Maksimal 90 karakter
+        hint: Judul Pinterest maksimal 90 karakter; klik AI setelah deskripsi Shopee ditempel
         required: false
       - label: Slug
         name: slug
         widget: ai-product-slug
+        required: true
+        pattern:
+          - '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          - Gunakan huruf kecil, angka, dan tanda hubung. Contoh: dekorasi-kamar
       - label: Deskripsi Produk
         name: description
         widget: ai-product-description
         required: false
+        pattern:
+          - '^[\s\S]{0,800}$'
+          - Maksimal 800 karakter
+        hint: Tempel deskripsi mentah dari Shopee (minimal 80 karakter untuk AI); hasil AI menjadi 2-3 paragraf
+      - label: Meta Description
+        name: metaDescription
+        widget: ai-product-meta-description
+        required: false
+        pattern:
+          - '^[\s\S]{0,160}$'
+          - Maksimal 160 karakter
+        hint: 130-155 karakter; diisi oleh AI atau dapat disunting
       - label: Kategori
         name: category
         widget: relation
@@ -101,12 +122,16 @@ collections:
           media_folder: /public/images/products
           public_folder: /images/products
       - label: Spesifikasi
-        name: spesifikasi
+        name: specs
         widget: ai-product-specifications
         required: false
       - label: Link Shopee
         name: shopeeUrl
         widget: string
+        required: true
+        pattern:
+          - '^https?://[^\s/?#]+(?:[/?#][^\s]*)?$'
+          - Masukkan URL yang diawali http:// atau https://
       - label: Label Promo
         name: badge
         widget: string

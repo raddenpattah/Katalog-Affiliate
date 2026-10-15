@@ -434,6 +434,10 @@
     }
   ],
   "functions": {
+    "api/generate-product.js": {
+      "maxDuration": 60,
+      "includeFiles": ["src/data/product-writing-rules.md"]
+    },
     "api/generate-blog.js": {
       "maxDuration": 60
     },
