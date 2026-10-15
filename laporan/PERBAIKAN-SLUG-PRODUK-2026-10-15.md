@@ -46,7 +46,7 @@ field produk lainnya tidak diubah.
   kunci pencarian produk; URL yang ditampilkan untuk produk terkait menggunakan
   slug produk.
 - Rute halaman detail dihasilkan dari slug yang didefinisikan pada JSON produk.
-- `vercel.json` memiliki 22 redirect permanen dengan status 301 dari URL lama
+- `vercel.json` memiliki redirect dengan status 301 dari URL lama
   menuju rute slug kanonis. Tiga redirect tambahan mencakup URL file lama untuk
   produk LAZZEN, marmer, dan wallboard WPC yang ditemukan pada katalog live.
 - ID `Panel PVC` dipakai tiga produk berbeda. Sesuai persetujuan, URL lama
@@ -69,9 +69,23 @@ field produk lainnya tidak diubah.
 - Sitemap: index terbuat dan sitemap-nya memuat seluruh 23 halaman produk dan
   3 halaman artikel.
 - Robots: `dist/robots.txt` tercopy dengan referensi sitemap index yang benar.
-- Redirect: seluruh tujuan yang dicek cocok dengan rute produk hasil build;
-  konfigurasi berisi 22 redirect berstatus 301.
+- Redirect (sebelum audit variasi URL): seluruh tujuan yang dicek cocok dengan
+  rute produk hasil build; konfigurasi berisi 22 redirect berstatus 301.
 - HTML hasil build: seluruh 555 referensi ke URL produk menunjuk ke rute slug
   yang dihasilkan.
 - `git diff --check`: berhasil.
 - `npm run build`: berhasil; Astro membangun 31 halaman tanpa error.
+
+## Audit Variasi URL Lama
+
+Pada audit lanjutan, semua ID produk diperiksa persis, termasuk whitespace.
+Ditambahkan 64 redirect sehingga `vercel.json` kini berisi 86 source unik;
+semua menggunakan `statusCode: 301`. Redirect yang sudah ada tetap dipertahankan.
+Untuk ID `Panel PVC` yang dipakai tiga produk, path ID bersama tetap menuju
+LAZZEN, sedangkan path historis berbasis nama file menuju produk marmer dan
+wallboard masing-masing.
+
+Skrip [check-product-redirects.mjs](../scripts/check-product-redirects.mjs)
+memverifikasi source duplikat, redirect loop, status 301, dan keberadaan
+destination di `dist/produk/`. Build dan skrip validasi berhasil dijalankan
+setelah penambahan redirect.
