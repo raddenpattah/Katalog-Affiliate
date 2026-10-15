@@ -1,6 +1,118 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "astro",
+  "redirects": [
+    {
+      "source": "/produk/Pohon%20Palem%20Bahan%20Plastik",
+      "destination": "/produk/pohon-palem-plastik-140-160cm",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/DAUN%20MONSTERA%20JUMBO%20ARTIFICIAL%20",
+      "destination": "/produk/daun-monstera-artificial-d24",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Karpet%20Lantai%20Ruang%20Tamu",
+      "destination": "/produk/karpet-lantai-ruang-tamu-100x150cm",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Karpet%20Lantai",
+      "destination": "/produk/karpet-shaggy-bulu-premium",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/LAMPU%20DINDING%20HIAS",
+      "destination": "/produk/lampu-dinding-hias-pilar",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Lampu%20Meja%20Aesthetic",
+      "destination": "/produk/lampu-meja-aesthetic-minimalis",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Lampu%20Meja%20Lampu%20Tidur%20Led",
+      "destination": "/produk/lampu-meja-led-vintage-jepang",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Lampu%20lantai%20berdiri",
+      "destination": "/produk/lampu-lantai-berdiri-double",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Lampu%20Tidur%20Anak%20",
+      "destination": "/produk/lampu-tidur-anak-rabbit-led",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Lampu%20tidur%20Bulan",
+      "destination": "/produk/lampu-tidur-bulan-3d-moonlight-8cm",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Panel%20PVC",
+      "destination": "/produk/lazzen-wood-panel-pvc-2-9m",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/lazzen-wood-panel-2-9-meter-x-15-cm-wood-panel-pvc-panel-board-wpc-wall-panel-pvc",
+      "destination": "/produk/lazzen-wood-panel-pvc-2-9m",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/marmer-panel-pvc-dekorasi-dinding-motif-corak-marmer-uv-marble-sheet",
+      "destination": "/produk/marmer-panel-pvc-uv",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/wallboard-wpc-wallboard-panel-pvc-wallboard-hiasan-dinding-ukuran-40-cm-x-2-9-m",
+      "destination": "/produk/wallboard-wpc-pvc-40cm",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Lampu%20Meja%20Lampu%20Kamar%20Tidur",
+      "destination": "/produk/mimoon-lampu-kamar-tidur-aesthetic",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/rak-ambalan-30cm",
+      "destination": "/produk/rak-ambalan-dinding-minimalis-kayu-60-150cm",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Rak%20Ambalan",
+      "destination": "/produk/rak-ambalan-extra-lebar-30cm-tanpa-bor",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/TANAMAN%20PLASTIK%20AGLONEMA",
+      "destination": "/produk/tanaman-aglonema-monstera-artificial",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Wall%20Panel%20Wood%20Panel%20PVC",
+      "destination": "/produk/wall-panel-pvc-150x15mm",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/Wallpaper%20Dinding%20Wood%20Panel%20",
+      "destination": "/produk/wallpaper-wood-panel-120x280cm",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/WPC%20Wall%20Panel",
+      "destination": "/produk/wpc-wood-wall-panel-2-9m-30cm",
+      "statusCode": 301
+    },
+    {
+      "source": "/produk/WPC%20Outdoor",
+      "destination": "/produk/wpc-outdoor-wall-panel-kisi-kisi",
+      "statusCode": 301
+    }
+  ],
   "functions": {
     "api/generate-blog.js": {
       "maxDuration": 60
