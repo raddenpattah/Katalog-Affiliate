@@ -161,6 +161,11 @@ export default async function handler(request, response) {
     if (message.startsWith('Hasil AI tidak valid:')) {
       return response.status(502).json({ error: message });
     }
+    if (message.startsWith('Semua provider AI gagal.')) {
+      const safeLogMessage = message.replace(/Cuplikan: [^|]*/g, 'Cuplikan: [omitted]');
+      console.error('AI product generation failed:', safeLogMessage);
+      return response.status(502).json({ error: message });
+    }
     console.error('AI product generation failed.');
     return response.status(502).json({
       error: message === 'Tidak ada provider AI produk yang aktif atau memiliki API key.'

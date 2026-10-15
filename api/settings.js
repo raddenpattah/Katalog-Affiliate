@@ -1,18 +1,31 @@
 import { readConfig, writeConfig, getDefaultConfig } from '../lib/config-store.js';
 
+function normalizeToken(value) {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (
+    trimmed.length >= 2 &&
+    ((trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+      (trimmed.startsWith("'") && trimmed.endsWith("'")))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
 function checkAuth(request) {
-  const token = process.env.AI_SETTINGS_ADMIN_TOKEN;
+  const token = normalizeToken(process.env.AI_SETTINGS_ADMIN_TOKEN);
   if (!token) {
     return { ok: false, reason: 'Admin token belum di-set di server' };
   }
 
-  const header = request.headers.authorization || '';
+  const header = request.headers?.authorization || '';
   const match = header.match(/^Bearer\s+(.+)$/i);
   if (!match) {
     return { ok: false, reason: 'Authorization header tidak ada' };
   }
 
-  if (match[1].trim() !== token.trim()) {
+  if (normalizeToken(match[1]) !== token) {
     return { ok: false, reason: 'Token tidak valid' };
   }
 

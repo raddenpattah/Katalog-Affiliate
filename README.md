@@ -80,7 +80,7 @@ Function, then streams the article body into the editor and fills description
 and tags when generation finishes. Existing descriptions and tags are
 preserved; generation only fills those fields when they are empty. Review and
 edit the result before publishing. The function uses Gemini's
-`gemini-3.8-flash` model and streams newline-delimited JSON events.
+`gemini-3.5-flash` model and streams newline-delimited JSON events.
 Transient Gemini server errors (HTTP 5xx) are retried up to three times with
 exponential delays before trying `GEMINI_FALLBACK_MODEL` (defaults to
 `gemini-3.6-flash`). Set that variable to a model available to your API key if
@@ -98,7 +98,7 @@ string `true` disables the endpoint. In Vercel, add `ENABLE_AI_GENERATOR` and
 `GEMINI_API_KEY` under **Project Settings > Environment Variables**, then
 redeploy. Never add the real API key to source control or expose it as a
 `PUBLIC_` environment variable.
-The generator's model is currently fixed to `gemini-3.8-flash`; a
+The generator's default model is currently `gemini-3.5-flash`; a
 `GEMINI_MODEL` environment variable does not override it.
 
 The Vercel function is configured with a 60-second maximum duration. The
