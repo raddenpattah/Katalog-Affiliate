@@ -2,6 +2,44 @@
   var productEventName = 'alfeto:generated-product-fields';
   var kebabCasePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+
+  function readDomTextarea(labelHint) {
+    var labels = document.querySelectorAll('label');
+    var hint = labelHint.toLowerCase();
+    for (var i = 0; i < labels.length; i++) {
+      var lbl = labels[i];
+      if (lbl.textContent.trim().toLowerCase().indexOf(hint) === -1) continue;
+      var container = lbl.closest('div') || lbl.parentElement;
+      while (container) {
+        var ta = container.querySelector('textarea');
+        if (ta && typeof ta.value === 'string' && ta.value.trim()) return ta.value.trim();
+        container = container.parentElement;
+      }
+    }
+    var all = document.querySelectorAll('textarea');
+    var best = '';
+    for (var j = 0; j < all.length; j++) {
+      if (all[j].value && all[j].value.trim().length > best.length) best = all[j].value.trim();
+    }
+    return best;
+  }
+
+  function readDomSelect(labelHint) {
+    var labels = document.querySelectorAll('label');
+    var hint = labelHint.toLowerCase();
+    for (var i = 0; i < labels.length; i++) {
+      var lbl = labels[i];
+      if (lbl.textContent.trim().toLowerCase().indexOf(hint) === -1) continue;
+      var container = lbl.closest('div') || lbl.parentElement;
+      while (container) {
+        var sel = container.querySelector('select, [role="combobox"]');
+        if (sel) return (sel.value || sel.textContent || '').trim();
+        container = container.parentElement;
+      }
+    }
+    return '';
+  }
+
   function readCurrentField(labelText) {
     var labels = document.querySelectorAll('label');
     var expectedLabel = labelText.trim().toLocaleLowerCase();
@@ -170,10 +208,10 @@
 
     generateProduct: async function () {
       var entry = this.props.entry;
-      var currentTitle = readEntryValue(entry, ['data', 'title']) || readCurrentField('Nama Produk');
+      var currentTitle = readCurrentField('Nama Produk') || readEntryValue(entry, ['data', 'title']);
       var title = this.state.generatedTitle === currentTitle ? this.state.sourceTitle : currentTitle;
-      var category = readCurrentField('Kategori') || readEntryValue(entry, ['data', 'category']);
-      var currentDescription = readEntryValue(entry, ['data', 'description']) || readCurrentField('Deskripsi Produk');
+      var category = readCurrentField('Kategori') || readEntryValue(entry, ['data', 'category']) || readDomSelect('Kategori');
+      var currentDescription = readCurrentField('Deskripsi Produk') || readEntryValue(entry, ['data', 'description']) || readDomTextarea('DESKRIPSI PRODUK');
       var description = this.state.generatedDescription === currentDescription
         ? this.state.sourceDescription
         : currentDescription;
