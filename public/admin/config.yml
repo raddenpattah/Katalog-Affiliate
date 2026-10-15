@@ -59,18 +59,18 @@ collections:
         name: id
         widget: ai-product-id
         required: true
-        hint: ID produk baru harus kebab-case huruf kecil; ID lama boleh tetap dipakai tanpa perubahan
+        hint: "ID produk baru harus kebab-case huruf kecil; ID lama boleh tetap dipakai tanpa perubahan"
       - label: Nama Produk
         name: title
         widget: ai-product-title
-        hint: Judul rapi untuk blog, maksimal 60 karakter; dapat dibuat dengan AI dari deskripsi Shopee
+        hint: "Judul rapi untuk blog, maksimal 60 karakter; dapat dibuat dengan AI dari deskripsi Shopee"
       - label: Title Pinterest
         name: titlePinterest
         widget: ai-product-title-pinterest
         pattern:
           - '^[\s\S]{0,90}$'
-          - Maksimal 90 karakter
-        hint: Judul Pinterest maksimal 90 karakter; klik AI setelah deskripsi Shopee ditempel
+          - 'Maksimal 90 karakter'
+        hint: "Judul Pinterest maksimal 90 karakter; klik AI setelah deskripsi Shopee ditempel"
         required: false
       - label: Slug
         name: slug
@@ -78,23 +78,23 @@ collections:
         required: true
         pattern:
           - '^[a-z0-9]+(?:-[a-z0-9]+)*$'
-          - Gunakan huruf kecil, angka, dan tanda hubung. Contoh: dekorasi-kamar
+          - 'Gunakan huruf kecil, angka, dan tanda hubung. Contoh: dekorasi-kamar'
       - label: Deskripsi Produk
         name: description
         widget: ai-product-description
         required: false
         pattern:
           - '^[\s\S]{0,800}$'
-          - Maksimal 800 karakter
-        hint: Tempel deskripsi mentah dari Shopee (minimal 80 karakter untuk AI); hasil AI menjadi 2-3 paragraf
+          - 'Maksimal 800 karakter'
+        hint: "Tempel deskripsi mentah dari Shopee (minimal 80 karakter untuk AI); hasil AI menjadi 2-3 paragraf"
       - label: Meta Description
         name: metaDescription
         widget: ai-product-meta-description
         required: false
         pattern:
           - '^[\s\S]{0,160}$'
-          - Maksimal 160 karakter
-        hint: 130-155 karakter; diisi oleh AI atau dapat disunting
+          - 'Maksimal 160 karakter'
+        hint: '130-155 karakter; diisi oleh AI atau dapat disunting'
       - label: Kategori
         name: category
         widget: relation
@@ -131,7 +131,7 @@ collections:
         required: true
         pattern:
           - '^https?://[^\s/?#]+(?:[/?#][^\s]*)?$'
-          - Masukkan URL yang diawali http:// atau https://
+          - 'Masukkan URL yang diawali http:// atau https://'
       - label: Label Promo
         name: badge
         widget: string
@@ -168,7 +168,7 @@ collections:
         time_format: "HH:mm"
         format: "YYYY-MM-DDTHH:mm:ssZ"
         picker_utc: false
-        hint: Kosongkan dan klik Publish untuk terbit langsung. Isi tanggal dan jam untuk menjadwalkan.
+        hint: "Kosongkan dan klik Publish untuk terbit langsung. Isi tanggal dan jam untuk menjadwalkan."
       - label: Gambar Utama
         name: heroImage
         widget: image
@@ -188,12 +188,12 @@ collections:
             name: seoTitle
             widget: string
             required: false
-            hint: Jika kosong, judul artikel dipakai sebagai judul SEO.
+            hint: "Jika kosong, judul artikel dipakai sebagai judul SEO."
           - label: Deskripsi SEO
             name: seoDescription
             widget: text
             required: false
-            hint: Jika kosong, deskripsi artikel dipakai sebagai deskripsi SEO.
+            hint: "Jika kosong, deskripsi artikel dipakai sebagai deskripsi SEO."
           - label: Tags
             name: tags
             widget: ai-tags
@@ -213,7 +213,7 @@ collections:
               - label: Alt Text
                 name: alt
                 widget: string
-                hint: Deskripsikan isi gambar untuk aksesibilitas.
+                hint: "Deskripsikan isi gambar untuk aksesibilitas."
               - label: Caption
                 name: caption
                 widget: text
