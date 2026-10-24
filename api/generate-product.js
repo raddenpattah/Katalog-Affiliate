@@ -149,7 +149,7 @@ export default async function handler(request, response) {
   if (!title || !category) {
     return response.status(400).json({ error: 'Nama produk dan kategori wajib diisi.' });
   }
-  if (title.length > 200 || category.length > 100 || description.length > 800) {
+  if (title.length > 200 || category.length > 100 || description.length > 5000) {
     return response.status(400).json({ error: 'Data sumber terlalu panjang.' });
   }
 

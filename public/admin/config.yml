@@ -84,8 +84,8 @@ collections:
         widget: ai-product-description
         required: false
         pattern:
-          - '^[\s\S]{0,800}$'
-          - 'Maksimal 800 karakter'
+          - '^[\s\S]{0,5000}$'
+          - 'Maksimal 5000 karakter'
         hint: "Tempel deskripsi mentah dari Shopee (minimal 80 karakter untuk AI); hasil AI menjadi 2-3 paragraf"
       - label: Meta Description
         name: metaDescription
