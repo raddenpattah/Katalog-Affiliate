@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "prebuild": "node scripts/check-product-ids.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",
