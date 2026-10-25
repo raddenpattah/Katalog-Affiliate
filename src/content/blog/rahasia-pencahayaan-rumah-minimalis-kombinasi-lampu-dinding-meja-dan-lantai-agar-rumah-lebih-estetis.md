@@ -15,10 +15,10 @@ advanced:
     - lampu dinding
     - lampu lantai
   productIds:
-    - Karpet Lantai Ruang Tamu
-    - Lampu Meja Aesthetic
-    - Lampu lantai berdiri
-    - Rak Ambalan
+    - karpet-lantai-ruang-tamu-100x150cm
+    - lampu-meja-aesthetic-minimalis
+    - lampu-lantai-berdiri-double
+    - rak-ambalan-extra-lebar-30cm-tanpa-bor
 ---
 **Rahasia Pencahayaan Rumah Minimalis**  
 

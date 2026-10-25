@@ -8,10 +8,10 @@ author: Alfeto Decor
 advanced:
   category: aksesoris
   productIds:
-    - Rak Ambalan
+    - rak-ambalan-extra-lebar-30cm-tanpa-bor
     - cermin-dinding-gantung-aesthetic
-    - Karpet Lantai
-    - Lampu lantai berdiri
+    - karpet-shaggy-bulu-premium
+    - lampu-lantai-berdiri-double
 draft: false
 ---
 

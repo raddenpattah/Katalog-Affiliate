@@ -59,7 +59,7 @@ collections:
         name: id
         widget: ai-product-id
         required: true
-        hint: "ID produk baru harus kebab-case huruf kecil; ID lama boleh tetap dipakai tanpa perubahan"
+        hint: "ID produk harus kebab-case huruf kecil dan sama dengan slug"
       - label: Nama Produk
         name: title
         widget: ai-product-title
@@ -232,7 +232,7 @@ collections:
             multiple: true
             default: []
             required: false
-            hint: "ID produk dari katalog — contoh: rak-ambalan-30cm"
+            hint: "ID produk dari katalog — contoh: rak-ambalan-dinding-minimalis-kayu-60-150cm"
           - label: Artikel Terkait
             name: internalLinks
             widget: ai-internal-links
